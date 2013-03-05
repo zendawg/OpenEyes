@@ -1,0 +1,30 @@
+<phpunit bootstrap="bootstrap.php"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	stopOnFailure="false"
+	verbose="true">
+
+	<filter>
+		<blacklist>
+			<directory suffix=".php">../../../yii/</directory>
+		</blacklist>
+		<whitelist>
+			<directory suffix=".php">../components</directory>
+			<directory suffix=".php">../controllers</directory>
+			<directory suffix=".php">../modules/admin/controllers</directory>
+			<directory suffix=".php">../models</directory>
+			<directory suffix=".php">../models/elements</directory>
+			<directory suffix=".php">../services</directory>
+			<exclude>
+				<directory suffix=".php">../components/summaryWidgets/views</directory>
+			</exclude>
+		</whitelist>
+	</filter>
+
+	<selenium>
+		<browser name="Internet Explorer" browser="*iexplore" />
+		<browser name="Firefox" browser="*firefox" />
+	</selenium>
+</phpunit>
