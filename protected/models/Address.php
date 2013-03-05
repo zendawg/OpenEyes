@@ -63,6 +63,7 @@ class Address extends BaseActiveRecord {
 			array('address1, address2, city, county', 'length', 'max' => 255),
 			array('postcode', 'length', 'max' => 10),
 			array('email', 'length', 'max' => 255),
+			array('address1, city, postcode', 'required'),
 			array('id, address1, address2, city, postcode, county, email', 'safe', 'on' => 'search'),
 		);
 	}

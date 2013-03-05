@@ -63,6 +63,7 @@ class Contact extends BaseActiveRecord {
 	public function rules() {
 		return array(
 			array('nick_name', 'length', 'max' => 80),
+			array('primary_phone, title, first_name, last_name', 'required'),
 			array('id, nick_name, primary_phone, title, first_name, last_name, qualifications', 'safe', 'on' => 'search'),
 		);
 	}

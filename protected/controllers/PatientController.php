@@ -344,8 +344,14 @@ class PatientController extends BaseController
 			} else {
 				$message .= 'found for your search.';
 			}
-			Yii::app()->user->setFlash('warning.no-results', $message);
-			$this->redirect('/');
+			if ($search_terms['hos_num']) {
+                            if ($nr == 0 && isset($_GET['hos_num']) && strlen($_GET['hos_num']) > 1) {
+                                $this->redirect(array('/patient/create', 'hos_num' => $_GET['hos_num']));
+                            }
+                        } else {
+                            Yii::app()->user->setFlash('warning.no-results', $message);
+                            $this->redirect('/');
+                        }
 		} else if($nr == 1) {
 			foreach ($dataProvider->getData() as $item) {
 				$this->redirect(array('patient/view/' . $item->id));
@@ -364,6 +370,68 @@ class PatientController extends BaseController
 			));
 		}
 		
+	}
+
+	/**
+	 * Create a new patient within the 'local' DB - i.e. not in the PAS.
+	 */
+	public function actionCreate()
+	{
+		if(isset($_POST['Patient'])
+                        && isset($_POST['Contact'])
+                        && isset($_POST['Address'])) {
+                    $this->patient = new Patient;
+                    $c = new Contact;
+                    $a = new Address;
+                    $this->patient->attributes = $_POST['Patient'];
+                    $c->attributes = $_POST['Contact'];
+                    $a->attributes = $_POST['Address'];
+                    $this->patient->contact = $c;
+                    $this->patient->address = $a;
+                    
+                    if (!$this->patient->validate() | !$a->validate()
+                            | !$c->validate()) {
+                        $this->render('/patient/create'
+                                );
+                        return;
+                    }
+                    
+                    // hospital number must be unique:
+                    $patientSearchHosNum = Patient::model()->find('hos_num', array('hos_num' => $this->patient->hos_num));
+                    if ($patientSearchHosNum && $patientSearchHosNum->hos_num == $this->patient->hos_num) {
+                        $this->render('/patient/create',
+                                array('patient_exists' => 'true'));
+                        return;
+                    }
+                    // NHS number must also be unique:
+                    $patientSearchNhsNum = Patient::model()->find('nhs_num', array('nhs_num' => $this->patient->nhs_num));
+                    if ($patientSearchNhsNum && $patientSearchNhsNum->nhs_num == $this->patient->nhs_num) {
+                        $this->render('/patient/create',
+                                array('patient_exists' => 'true'));
+                        return;
+                    }
+                    // else it's a new patient - save it:
+                    $this->patient->save();
+                    $id = $this->patient->id;
+                    $a->parent_id = $id;
+                    $a->country_id = 1;
+                    $a->type = 'H';
+                    $a->parent_class = 'Patient';
+                    
+                    $c->parent_id = $id;
+                    $c->parent_class = 'Patient';
+                    
+                    
+                    $a->save();
+                    $c->save();
+                    $dataProvider = new CActiveDataProvider('Patient');
+                    $this->redirect('/patient/view/' . $this->patient->id);
+                } else {
+                    $dataProvider = new CActiveDataProvider('Patient');
+                    $this->render('create', array(
+                            'dataProvider' => $dataProvider,
+                    ));
+                }
 	}
 
 	public function actionSummary()

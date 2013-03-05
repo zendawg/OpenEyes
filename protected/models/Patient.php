@@ -93,6 +93,9 @@ class Patient extends BaseActiveRecord {
 			array('hos_num, nhs_num', 'length', 'max' => 40),
 			array('gender', 'length', 'max' => 1),
 			array('dob, date_of_death', 'safe'),
+			array('dob, hos_num, nhs_num, gender', 'required'),
+                        array('dob', 'type', 'type' => 'date', 
+                            'message' => '{attribute}: is not a date!', 'dateFormat' => 'yyyy-MM-dd'),
 			array('dob, hos_num, nhs_num, date_of_death', 'safe', 'on' => 'search'),
 		);
 	}
