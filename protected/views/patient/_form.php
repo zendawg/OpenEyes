@@ -19,6 +19,9 @@
         if (isset($_GET['hos_num'])) {
             $patient->hos_num = $_GET['hos_num'];
         }
+        if (isset($_GET['nhs_num'])) {
+            $patient->nhs_num = $_GET['nhs_num'];
+        }
         $patient->contact = new Contact;
         $patient->address = new Address;
     }

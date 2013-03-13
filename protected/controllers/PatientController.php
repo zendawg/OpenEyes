@@ -348,6 +348,10 @@ class PatientController extends BaseController
                             if ($nr == 0 && isset($_GET['hos_num']) && strlen($_GET['hos_num']) > 1) {
                                 $this->redirect(array('/patient/create', 'hos_num' => $_GET['hos_num']));
                             }
+                        } else if ($search_terms['nhs_num']) {
+                            if ($nr == 0 && isset($_GET['nhs_num']) && strlen($_GET['nhs_num']) > 1) {
+                                $this->redirect(array('/patient/create', 'nhs_num' => $_GET['nhs_num']));
+                            }
                         } else {
                             Yii::app()->user->setFlash('warning.no-results', $message);
                             $this->redirect('/');
