@@ -56,6 +56,7 @@ return array(
 						'showScriptName' => false,
 						'rules' => array(
 								'' => 'site/index',
+                                'virtualClinic/results/<page_num:\d+>/<sort_dir:\d+>/<sort_by:\d+>/<site_id:\d+>/<clinic_id:\d+>'=>'/VirtualClinic/virtualClinic/results/',
 								'patient/viewpas/<pas_key:\d+>' => 'patient/viewpas',
 								'transport/digest/<date:\d+>_<time:\d+>.csv'=>'transport/digest',
 								'transport/<page:\d+>' => 'transport/index',
