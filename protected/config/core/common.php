@@ -61,6 +61,8 @@ return array(
 								'transport/digest/<date:\d+>_<time:\d+>.csv'=>'transport/digest',
 								'transport/<page:\d+>' => 'transport/index',
 								'transport/<page:\d+>/<date_from:.*>/<date_to:.*>/<include_bookings:.*>/<include_reschedules:.*>/<include_cancellations:.*>' => 'transport/index',
+								'asset/preview/<id:\d+>.jpg' => 'asset/preview',
+								'asset/thumbnail/<id:\d+>.jpg' => 'asset/thumbnal',
 								'<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',
 								'<controller:\w+>/<id:\d+>' => '<controller>/view',
 								'<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
@@ -159,5 +161,6 @@ return array(
 				'erod_lead_time_weeks' => 3,
 				'hos_num_regex' => '/^([0-9]{1,9})$/',
 				'pad_hos_num' => '%07s',
+				'apache_user' => 'www-data',
 		)
 );

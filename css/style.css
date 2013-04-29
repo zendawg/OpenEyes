@@ -1224,3 +1224,11 @@ input.diagnosis_eye { margin-left: 10px; }
 /*	in order to ensure consistant display scale on iphone and ipad the min-height needs adjusting  width:1230px; */
 	#content { min-height: 1230px !important; }
 }
+
+div.scan-thumbnails { margin-bottom: 60px; }
+.scan-thumbnail { background-repeat: no-repeat; background-position: center; width: 150px; height: 150px; display: inline-block; border: 4px solid #ccc; margin-right: 5px; margin-left: 5px; }
+.scan-thumbnail .preview-thumbnail { margin-left: 30px; margin-top: 4px; }
+.scan-thumbnail a:hover { text-decoration: none; border: 0; }
+.scan-thumbnail-preview-link { height: 38px; }
+.scan-thumbnail-select-target { height: 150px; }
+.scan-thumbnail-date { margin-top: 4px; }

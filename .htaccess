@@ -5,7 +5,9 @@ RewriteEngine On
 RewriteBase /
 
 # Things not to rewrite
-RewriteCond %{REQUEST_URI} !(\.gif$)|(\.jpg$)|(\.png$)|(\.css$)|(\.js$)|(\.ico$)
+RewriteCond %{REQUEST_URI} !\.(gif|jpg|png|css|js|ico)$ [OR]
+RewriteCond %{REQUEST_URI} /asset/preview/[0-9]+\.jpg$ [OR]
+RewriteCond %{REQUEST_URI} /asset/thumbnail/[0-9]+\.jpg$
 
 # If a file exists, use it directly
 RewriteCond %{REQUEST_FILENAME} !-f
