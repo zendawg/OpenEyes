@@ -1,6 +1,6 @@
 <div id="episodes_sidebar">
 	<?php
-	$legacyletters = EventType::model()->find('class_name=?',array('OphLeEpatientletter'));
+	$legacyletters = EventType::model()->find('class_name=?',array('OphScImagehumphreys'));
 	?>
 	<?php if ($legacyletters && !$legacyletters->disabled && is_array($legacyepisodes)) foreach ($legacyepisodes as $i => $episode) {?>
 	<div class="episode open clearfix" style="display:block;">
@@ -9,12 +9,12 @@
 				<?php echo $episode->NHSDate('start_date')?>
 				<span class="aBtn">
 					<a class="sprite showhide2 legacy" href="#">
-						<span class="<?php if ((!$this->event || $this->event->eventType->class_name != 'OphLeEpatientletter') && !@Yii::app()->session['episode_hide_status']['legacy']) {?>show<?php }else{?>hide<?php }?>"></span>
+						<span class="<?php if ((!$this->event || $this->event->eventType->class_name != 'OphScImagehumphreys') && !@Yii::app()->session['episode_hide_status']['legacy']) {?>show<?php }else{?>hide<?php }?>"></span>
 					</a>
 				</span>
 			</div>
-			<h4 class="legacy" style="margin-left: 8px;">Legacy events</h4>
-			<ul class="events"<?php if ((!$this->event || $this->event->eventType->class_name != 'OphLeEpatientletter') && !@Yii::app()->session['episode_hide_status']['legacy']) {?> style="display: none;"<?php }?>>
+			<h4 class="legacy" style="margin-left: 8px;">Legacy image events</h4>
+			<ul class="events"<?php if ((!$this->event || $this->event->eventType->class_name != 'OphScImagehumphreys') && !@Yii::app()->session['episode_hide_status']['legacy']) {?> style="display: none;"<?php }?>>
 					<?php foreach ($episode->events as $event) {
 						$highlight = false;
 
