@@ -621,14 +621,29 @@ class ElementOperation extends BaseEventTypeElement
 		return $text;
 	}
 
-	public function getWardOptions($siteId, $theatreId = null)
+	public function getWardOptions($session)
 	{
-		if (empty($siteId)) {
-			throw new Exception('Site id is required.');
+		if (!$session || !$session->id) {
+			throw new Exception('Session is required.');
 		}
+		
+		$siteId = $session->theatre->site_id;
+		$theatreId = $session->theatre_id;
+		
 		$results = array();
-		// if we have a theatre id, see if it has an associated ward
-		if (!empty($theatreId)) {
+		
+		if($session->sequence_id == 328 // Allan Bruce (External) Saturday, CR9
+				&& $ward = Ward::model()->find('code = ?', array('CL4'))) {
+			// ANOTHER TEMPORARY FIX FOR THEATRE 9 AND NEW WARD (CL4)
+			$results[$ward->id] = $ward->name;
+		} else if($session->theatre->code == 'CR9'
+				&& strtotime($session->date) >= strtotime('2013-04-08')
+				&& strtotime($session->date) <= strtotime('2013-06-02')
+				&& $ward = Ward::model()->find('code = ?', array('OW4'))) {
+			// TEMPORARY FIX FOR THEATRE 9 MAINTAINANCE (USING OW4 INSTEAD)
+			$results[$ward->id] = $ward->name;
+		} else if (!empty($theatreId)) {
+			// if we have a theatre id, see if it has an associated ward
 			$ward = Yii::app()->db->createCommand()
 				->select('t.ward_id AS id, w.name')
 				->from('theatre_ward_assignment t')
@@ -1014,7 +1029,7 @@ class ElementOperation extends BaseEventTypeElement
 				case 1: // City Road
 					switch ($serviceId) {
 						case 2: // Adnexal
-							$changeContact = 'Sarah Veerapatren on 020 7566 2206/2292';
+							$changeContact = 'Admission Coordinator on 020 7566 2206/2292';
 							break;
 						case 4: // Cataract
 							switch($firmCode)  {
@@ -1172,9 +1187,9 @@ class ElementOperation extends BaseEventTypeElement
 		}
 
 		# OE-2259 special case for Allan Bruce in External Theatre 9 or CXL
-		if ($this->event->episode->firm_id == 19
-			&& ($this->booking->session->theatre_id == 9 || $this->booking->session->theatre_id == 25)) {
-			$contact['refuse'] = '020 7566 2205';
+		if ($this->event->episode->firm->serviceSubspecialtyAssignment->subspecialty->ref_spec == 'EX'
+			&& ($this->booking->session->theatre->code == 'CR9' || $this->booking->session->theatre->code == 'CXL')) {
+			$contact['refuse'] = $subspecialty->name . ' Admission Coordinator on 020 7566 2205';
 		}
 
 		return $contact;
@@ -1393,10 +1408,12 @@ class ElementOperation extends BaseEventTypeElement
 		}
 		OELog::log("Operation cancelled: $this->id");
 
-		$this->event->episode->episode_status_id = 5;
+		if ($episode = $this->event->episode) {
+			$episode->episode_status_id = 5;
 
-		if (!$this->event->episode->save()) {
-			throw new Exception('Unable to change episode status for episode '.$this->event->episode->id);
+			if (!$episode->save()) {
+				throw new Exception('Unable to change episode status for episode '.$episode->id);
+			}
 		}
 
 		// Update event datestamp

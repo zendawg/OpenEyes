@@ -42,7 +42,7 @@ class AdminController extends BaseController
 	}
 
 	public function actionIndex() {
-		$this->actionUsers();
+		$this->redirect(array('/admin/users'));
 	}
 
 	public function actionUsers($id=false) {
@@ -102,6 +102,19 @@ class AdminController extends BaseController
 				if (!$user->save()) {
 					throw new Exception("Unable to save user: ".print_r($user->getErrors(),true));
 				}
+
+				if ($uca = UserContactAssignment::model()->find('user_id=?',array($user->id))) {
+					$contact = $uca->contact;
+					$contact->title = $user->title;
+					$contact->first_name = $user->first_name;
+					$contact->last_name = $user->last_name;
+					$contact->qualifications = $user->qualifications;
+
+					if (!$contact->save()) {
+						throw new Exception("Unable to save user contact: ".print_r($contact->getErrors(),true));
+					}
+				}
+
 				$this->redirect('/admin/users/'.ceil($user->id/$this->items_per_page));
 			}
 		}
@@ -180,5 +193,15 @@ class AdminController extends BaseController
 			'page' => $page,
 			'pages' => ceil(count($params['model']::model()->findAll()) / $this->items_per_page),
 		);
+	}
+
+	public function actionLookupUser() {
+		Yii::app()->event->dispatch('lookup_user', array('username' => $_GET['username']));
+
+		if ($user = User::model()->find('username=?',array($_GET['username']))) {
+			echo $user->id;
+		} else {
+			echo "NOTFOUND";
+		}
 	}
 }
