@@ -64,6 +64,7 @@ class Asset extends BaseActiveRecord
 	public function relations()
 	{
 		return array(
+			'file' => array(self::BELONGS_TO, 'FsFile', 'file_id'),
 		);
 	}
 
