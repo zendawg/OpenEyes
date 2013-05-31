@@ -56,6 +56,8 @@ return array(
                 array('restful/rest', 'pattern' => 'restful/rest/<model:\w+>/<id:\d+>'),
                 // REST patterns: create(post)/list(get)
                 array('restful/rest', 'pattern' => 'restful/rest/<model:\w+>'),
+                // non-REST patterns: search(post)
+                array('restful/search', 'pattern' => 'restful/search/<model:\w+>'),
                 // Other controllers
                 'virtualClinic/results/<page_num:\d+>/<sort_dir:\d+>/<sort_by:\d+>/<site_id:\d+>/<clinic_id:\d+>' => '/VirtualClinic/virtualClinic/results/',
                 'patient/viewpas/<pas_key:\d+>' => 'patient/viewpas',

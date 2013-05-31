@@ -19,8 +19,8 @@ class RestfulController extends Controller {
   }
 
   /**
-   * 
-   * @return type
+   * Perform a get with ID (view), get without ID (list), create (post) or
+   * update (put) with ID.
    */
   public function actionRest() { 
     // until this has been fully adapted and modifed, localhost access only
@@ -56,9 +56,19 @@ class RestfulController extends Controller {
         break;
     }
   }
-
+  
   /**
    * 
+   * @return type
+   */
+  public function actionSearch() {
+    $this->_checkAuth();
+    
+    $this->search($_GET['model']);
+  }
+
+  /**
+   * View all models of the specified class.
    * 
    * @param type $model
    */
@@ -86,8 +96,49 @@ class RestfulController extends Controller {
       $this->_sendResponse(200, CJSON::encode($rows));
     }
   }
+  /**
+   * View all models of the specified class.
+   * 
+   * @param type $model
+   */
+  private function search($model) {
+    // Get the respective model instance
+    $json = file_get_contents('php://input');
+    $put_vars = CJSON::decode($json, true);  
+    try {
+      $search = new $model;
+      $criteria = new CDbCriteria;
+      foreach ($put_vars as $var => $value) {
+        // Does the model have this attribute? If not raise an error
+        if ($search->hasAttribute($var)) {
+          $criteria->compare($var,$value); 
+        }
+        else
+          $this->_sendResponse(500, sprintf('Parameter <b>%s</b> is not allowed for model <b>%s</b> - json was %s', $var, $model, $json));
+      }
+      $models = $search::model()->findAll($criteria);
+    } catch (Exception $e) {
+      // Model not implemented error
+      $this->_sendResponse(501, sprintf(
+                      'Error: Mode <b>search</b> is not implemented for model <b>%s</b>', $model));
+      Yii::app()->end();
+    }
+    // Did we get some results?
+    if (empty($models)) {
+      // No
+      $this->_sendResponse(200, sprintf('No items where found for model <b>%s</b>', $model));
+    } else {
+      // Prepare response
+      $rows = array();
+      foreach ($models as $model)
+        $rows[] = $model->attributes;
+      // Send the response
+      $this->_sendResponse(200, CJSON::encode($rows));
+    }
+  }
 
   /**
+   * View the specified model.
    * 
    * @param type $id
    * @param type $model
@@ -121,6 +172,8 @@ class RestfulController extends Controller {
   }
 
   /**
+   * Create a new instance of the specified model. Query parameters are
+   * specified using JSON.
    * 
    * @param model $model
    */
@@ -165,7 +218,7 @@ class RestfulController extends Controller {
   }
 
   /**
-   * 
+   * Update the specified model, query parameters specified using JSON.
    * @param type $id
    * @param type $model
    */
