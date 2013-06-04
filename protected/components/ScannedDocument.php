@@ -31,7 +31,7 @@ class ScannedDocument {
             . '.models.' . $class_name;
     Yii::import($module_name);
     $doc = new $class_name;
-    return $doc->getScannedDocument($patient_id, $assetId, $params);
+    return $doc->getScannedDocument($assetId, $params);
   }
 
   /**
