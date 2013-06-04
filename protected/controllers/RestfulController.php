@@ -51,7 +51,7 @@ class RestfulController extends Controller {
 //        break;
       default :
         $this->_sendResponse(501, sprintf(
-                        'Error: Invalid request method: <b>%s</b>', $requestMethod));
+                        'Error: Invalid request method: \'%s\'', $requestMethod));
 
         break;
     }
@@ -80,13 +80,13 @@ class RestfulController extends Controller {
     } catch (Exception $e) {
       // Model not implemented error
       $this->_sendResponse(501, sprintf(
-                      'Error: Mode <b>list</b> is not implemented for model <b>%s</b>', $model));
+                      'Error: Mode list is not implemented for model \'%s\'', $model));
       Yii::app()->end();
     }
     // Did we get some results?
     if (empty($models)) {
       // No
-      $this->_sendResponse(200, sprintf('No items where found for model <b>%s</b>', $model));
+      $this->_sendResponse(200, sprintf('No items where found for model \'%s\'', $model));
     } else {
       // Prepare response
       $rows = array();
@@ -97,7 +97,7 @@ class RestfulController extends Controller {
     }
   }
   /**
-   * View all models of the specified class.
+   * Search for the specified model and get a list of matches.
    * 
    * @param type $model
    */
@@ -114,19 +114,19 @@ class RestfulController extends Controller {
           $criteria->compare($var,$value); 
         }
         else
-          $this->_sendResponse(500, sprintf('Parameter <b>%s</b> is not allowed for model <b>%s</b> - json was %s', $var, $model, $json));
+          $this->_sendResponse(500, sprintf('Parameter \'%s\' is not allowed for model \'%s\' - json was \'%s\'', $var, $model, $json));
       }
       $models = $search::model()->findAll($criteria);
     } catch (Exception $e) {
       // Model not implemented error
       $this->_sendResponse(501, sprintf(
-                      'Error: Mode <b>search</b> is not implemented for model <b>%s</b>', $model));
+                      'Error: Mode search is not implemented for model \'%s\'', $model));
       Yii::app()->end();
     }
     // Did we get some results?
     if (empty($models)) {
       // No
-      $this->_sendResponse(200, sprintf('No items where found for model <b>%s</b>', $model));
+      $this->_sendResponse(200, sprintf('No items where found for model \'%s\'', $model));
     } else {
       // Prepare response
       $rows = array();
@@ -146,7 +146,7 @@ class RestfulController extends Controller {
   private function view($id, $model) {
     // Check if id was submitted via GET
     if (!isset($id)) {
-      $this->_sendResponse(500, 'Error: Parameter <b>id</b> is missing');
+      $this->_sendResponse(500, 'Error: Parameter id is missing');
     }
     try {
       $class_name = new $model;
@@ -155,13 +155,13 @@ class RestfulController extends Controller {
         $model = $class_name::model()->findByPk($id);
       } else {
         $this->_sendResponse(501, sprintf(
-                        'Mode <b>view</b> is not implemented for model <b>%s</b>', $model));
+                        'Mode view is not implemented for model \'%s\'', $model));
         Yii::app()->end();
       }
     } catch (Exception $e) {
 
       $this->_sendResponse(501, sprintf(
-                      'Error loading model <b>%s</b>', $model));
+                      'Error loading model \'%s\'', $model));
       Yii::app()->end();
     }
     // Did we find the requested model? If not, raise an error
@@ -187,7 +187,7 @@ class RestfulController extends Controller {
       $model = new $model;
     } catch (Exception $e) {
       $this->_sendResponse(501, sprintf(
-                      'Error loading model <b>%s</b>', $model));
+                      'Error loading model \'%s\'', $model));
       Yii::app()->end();
     }
     foreach ($put_vars as $var => $value) {
@@ -195,7 +195,7 @@ class RestfulController extends Controller {
       if ($model->hasAttribute($var))
         $model->$var = $value;
       else
-        $this->_sendResponse(500, sprintf('Parameter <b>%s</b> is not allowed for model <b>%s</b>', $var, $model));
+        $this->_sendResponse(500, sprintf('Parameter \'%s\' is not allowed for model \'%s\'', $var, $model));
     }
     // Try to save the model
     if ($model->save())
@@ -203,7 +203,7 @@ class RestfulController extends Controller {
     else {
       // Errors occurred
       $msg = "<h1>Error</h1>";
-      $msg .= sprintf("Couldn't create model <b>%s</b>", $model);
+      $msg .= sprintf("Couldn't create model \'%s\'", $model);
       $msg .= "<ul>";
       foreach ($model->errors as $attribute => $attr_errors) {
         $msg .= "<li>Attribute: $attribute</li>";
@@ -234,18 +234,18 @@ class RestfulController extends Controller {
         $model = $class_name::model()->findByPk($id);
       } else {
         $this->_sendResponse(501, sprintf(
-                        'Mode <b>view</b> is not implemented for model <b>%s</b>', $model));
+                        'Mode view is not implemented for model \'%s\'', $model));
         Yii::app()->end();
       }
     } catch (Exception $e) {
 
       $this->_sendResponse(501, sprintf(
-                      'Error loading model <b>%s</b>', $model));
+                      'Error loading model \'%s\'', $model));
       Yii::app()->end();
     }
     // Did we find the requested model? If not, raise an error
     if ($model === null)
-      $this->_sendResponse(400, sprintf("Error: Didn't find any model <b>%s</b> with ID <b>%s</b>.", $model, $id));
+      $this->_sendResponse(400, sprintf("Error: Didn't find any model \'%s\' with ID \'%s\'.", $model, $id));
     unset($put_vars['id']);
     // Try to assign PUT parameters to attributes
     foreach ($put_vars as $var => $value) {
@@ -253,7 +253,7 @@ class RestfulController extends Controller {
       if ($model->hasAttribute($var))
         $model->$var = $value;
       else {
-        $this->_sendResponse(500, sprintf('Parameter <b>%s</b> is not allowed for model <b>%s</b>', $var, $model));
+        $this->_sendResponse(500, sprintf('Parameter \'%s\' is not allowed for model \'%s\'', $var, $model));
       }
     }
     // Try to save the model
@@ -274,19 +274,19 @@ class RestfulController extends Controller {
 //        $model = Asset::model()->findByPk($_GET['id']);
 //        break;
 //      default:
-//        $this->_sendResponse(501, sprintf('Error: Mode <b>delete</b> is not implemented for model <b>%s</b>', $_GET['model']));
+//        $this->_sendResponse(501, sprintf('Error: Mode delete is not implemented for model \'%s\'', $_GET['model']));
 //        Yii::app()->end();
 //    }
 //    // Was a model found? If not, raise an error
 //    if ($model === null)
-//      $this->_sendResponse(400, sprintf("Error: Didn't find any model <b>%s</b> with ID <b>%s</b>.", $_GET['model'], $_GET['id']));
+//      $this->_sendResponse(400, sprintf("Error: Didn't find any model \'%s\' with ID \'%s\'.", $_GET['model'], $_GET['id']));
 //
 //    // Delete the model
 //    $num = $model->delete();
 //    if ($num > 0)
 //      $this->_sendResponse(200, $num);    //this is the only way to work with backbone
 //    else
-//      $this->_sendResponse(500, sprintf("Error: Couldn't delete model <b>%s</b> with ID <b>%s</b>.", $_GET['model'], $_GET['id']));
+//      $this->_sendResponse(500, sprintf("Error: Couldn't delete model \'%s\' with ID \'%s\'.", $_GET['model'], $_GET['id']));
 //  }
 
   /**
