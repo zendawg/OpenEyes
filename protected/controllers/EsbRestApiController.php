@@ -68,7 +68,7 @@ class EsbRestApiController extends RestfulController {
       $episode = Episode::model()->find('patient_id=' . $patient->id);
       if (count($episode) == 1) {
         
-          $timestamp = time() - (60 * 60 * 1000);
+          $timestamp = time() - (60 * 1000);
           $date = date('o-m-d H:i:s', $timestamp);
           $xml_image = FsScanHumphreyXml::model()->find('id=' . $xml_id);
 
