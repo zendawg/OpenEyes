@@ -35,9 +35,17 @@ if (!Yii::app()->user->isGuest) {
 
             <ul id="user_nav">
 
+                <?php
+                // the clinic site and firm influenced by user logged in settings:
+                $firm_id = Yii::app()->session['selected_firm_id'];
+                $firm = Firm::model()->findByPk($firm_id);
+                $site_id = Yii::app()->request->cookies['site_id']->value;
+                $subspeciality_id = $firm->serviceSubspecialtyAssignment->subspecialty_id;
+                ?>
+              
                 <select id="urlList" onchange="window.location.href = this.value">
                     <option>Choose...</option>
-                    <option value="/virtualClinic/results/0/0/0/0/0">Virtual Clinic</option>
+                    <option value="/virtualClinic/results/1/1/6/<?php echo $site_id ?>/<?php echo $subspeciality_id ?>">Virtual Clinic</option>
                     <option value="/">Search</option>
                 </select>
 
