@@ -75,8 +75,7 @@ class FsFile extends CActiveRecord
 			'createdUser' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 			'lastModifiedUser' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
 			'dir' => array(self::BELONGS_TO, 'FsDirectory', 'dir_id'),
-			'fsScanHumphreyImages' => array(self::HAS_MANY, 'FsScanHumphreyImage', 'file_id'),
-			'fsScanHumphreyXmls' => array(self::HAS_MANY, 'FsScanHumphreyXml', 'file_id'),
+			'parentFile' => array(self::HAS_MANY, 'FsFile', 'chronological_key'),
 		);
 	}
 

@@ -53,11 +53,13 @@ return array(
             'rules' => array(
                 '' => 'site/index',
                 // REST patterns: view(get)/update(put)
-                array('restful/rest', 'pattern' => 'restful/rest/<model:\w+>/<id:\d+>'),
+                array('esbrestapi/rest', 'pattern' => 'esbrestapi/rest/<model:\w+>/<id:\d+>'),
                 // REST patterns: create(post)/list(get)
-                array('restful/rest', 'pattern' => 'restful/rest/<model:\w+>'),
+                array('esbrestapi/rest', 'pattern' => 'esbrestapi/rest/<model:\w+>'),
                 // non-REST patterns: search(post)
-                array('restful/search', 'pattern' => 'restful/search/<model:\w+>'),
+                array('esbrestapi/search', 'pattern' => 'esbrestapi/search/<model:\w+>'),
+                // non-REST patterns: search(post)
+                array('esbrestapi/createEvent', 'pattern' => 'esbrestapi/createEvent'),
                 // Other controllers
                 'virtualClinic/results/<page_num:\d+>/<sort_dir:\d+>/<sort_by:\d+>/<site_id:\d+>/<clinic_id:\d+>' => '/VirtualClinic/virtualClinic/results/',
                 'patient/viewpas/<pas_key:\d+>' => 'patient/viewpas',

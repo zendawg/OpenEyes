@@ -25,7 +25,7 @@ class ScannedDocument {
    * 
    * @return null
    */
-  public static function getScannedDocument($imageType, $patient_id, $assetId, $params) {
+  public static function getScannedDocument($imageType, $patient_id, $assetId, $params = null) {
     $class_name = 'Element_OphScImage' . strtolower($imageType) . '_Document';
     $module_name = 'application.modules.OphScImage' . strtolower($imageType)
             . '.models.' . $class_name;
