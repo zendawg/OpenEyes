@@ -60,15 +60,15 @@ class EsbRestApiController extends RestfulController {
     $xml_id = $_GET['xml_id'];
     $test_strategy = $_GET['test_strategy'];
     
-    $tif_image = FsScanHumphreyImage::model()->find('file_id=' . $tif_file_id);
     $event_type = EventType::model()->find('class_name=\'OphInVisualfields\'');
     $patient = Patient::model()->find('hos_num=' . $pid);
-    if ($patient && $event_type && $tif_image) {
+    if ($patient && $event_type) {
       
       $episode = Episode::model()->find('patient_id=' . $patient->id);
       if (count($episode) == 1) {
         
-          $timestamp = time() - (60 * 1000);
+          $createdDate = date('o-m-d H:i:s');
+          $timestamp = time() - (60 * 60 * 1000);
           $date = date('o-m-d H:i:s', $timestamp);
           $xml_image = FsScanHumphreyXml::model()->find('id=' . $xml_id);
 
@@ -80,8 +80,13 @@ class EsbRestApiController extends RestfulController {
                   'pid=\'' . $patient->hos_num . '\' and created_date>=\'' . $date . '\' and associated=0 and eye=\'' . $eye . '\''
                   );
           if (count($images) > 0) {
-            $previous_tif = FsScanHumphreyImage::model()->find('file_id=' . $images[0]->tif_file_id);
-            
+            $tifCriteria = new CDbCriteria;
+            $tifCriteria->addCondition('file_id=\'' . $images[0]->tif_file_id . '\'');
+            $previous_tif = FsScanHumphreyImage::model()->find($tifCriteria);
+            // the current tif that is being tested for:
+            $tifCriteria = new CDbCriteria;
+            $tifCriteria->addCondition('file_id=\'' . $tif_file_id . '\'');
+            $tif_image = FsScanHumphreyImage::model()->find($tifCriteria);
             if ($images[0]->eye == 'R') {
               $tmp = $previous_tif->asset_id;
               $previous_tif->asset_id = $tif_image->asset_id;
@@ -95,8 +100,8 @@ class EsbRestApiController extends RestfulController {
             $event->episode_id = $episode->id;
             $event->event_type_id = $event_type->id;
             $event->created_user_id=1;
-            $event->created_date=$date;
-            $event->datetime=$date;
+            $event->created_date=$createdDate;
+            $event->datetime=$createdDate;
             $event->save();
             $objTestType = new Element_OphInVisualfields_Testtype;
             $objTestType->event_id = $event->id;
