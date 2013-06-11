@@ -159,7 +159,7 @@ abstract class RestfulController extends Controller {
     // Did we get some results?
     if (empty($models)) {
       // No
-      $this->_sendResponse(200, sprintf('No items where found for model \'%s\'', $model));
+      $this->_sendResponse(400, sprintf('No items where found for model \'%s\'', $model));
     } else {
       // Prepare response
       $rows = array();
