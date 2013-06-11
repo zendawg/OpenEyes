@@ -64,8 +64,8 @@ class EsbRestApiController extends RestfulController {
     $patient = Patient::model()->find('hos_num=' . $pid);
     if ($patient && $event_type) {
       
-      $episode = Episode::model()->find('patient_id=' . $patient->id);
-      if (count($episode) == 1) {
+      $episodes = Episode::model()->findAll('patient_id=' . $patient->id);
+      if (count($episodes) == 1) {
         
           $createdDate = date('o-m-d H:i:s');
           $timestamp = time() - (60 * 60 * 1000);
@@ -97,7 +97,7 @@ class EsbRestApiController extends RestfulController {
             $testStrategy = OphInVisualfields_Strategy::model()->find('name=\'' . $test_strategy . '\'');
 
             $event = new Event;
-            $event->episode_id = $episode->id;
+            $event->episode_id = $episodes[0]->id;
             $event->event_type_id = $event_type->id;
             $event->created_user_id=1;
             $event->created_date=$createdDate;
