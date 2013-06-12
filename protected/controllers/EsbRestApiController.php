@@ -20,7 +20,7 @@ class EsbRestApiController extends RestfulController {
     return $this->getUpdatableModels();
   }
   function getUpdatableModels() {
-    return array('Asset', 'FsFile', 'FsDirectory', 'FsScanHumphreyImage',
+    return array('FsFile', 'FsDirectory', 'FsScanHumphreyImage',
         'FsScanHumphreyXml', 'Element_OphInVisualfields_Testtype',
         'Element_OphInVisualfields_Details', 'Element_OphInVisualfields_Image',
         'ScannedDocumentUid',
@@ -88,9 +88,9 @@ class EsbRestApiController extends RestfulController {
             $tifCriteria->addCondition('file_id=\'' . $tif_file_id . '\'');
             $tif_image = FsScanHumphreyImage::model()->find($tifCriteria);
             if ($images[0]->eye == 'R') {
-              $tmp = $previous_tif->asset_id;
-              $previous_tif->asset_id = $tif_image->asset_id;
-              $tif_image->asset_id = $tmp;
+              $tmp = $previous_tif->file_id;
+              $previous_tif->file_id = $tif_image->file_id;
+              $tif_image->file_id = $tmp;
             }
             
             $testType = OphInVisualfields_Testtype::model()->find('name=\'Humphreys\'');
@@ -113,8 +113,8 @@ class EsbRestApiController extends RestfulController {
             $objDetails->save();
             $objImage = new Element_OphInVisualfields_Image;
             $objImage->event_id = $event->id;
-            $objImage->left_image = $previous_tif->asset_id;
-            $objImage->right_image = $tif_image->asset_id;
+            $objImage->left_image = $previous_tif->file_id;
+            $objImage->right_image = $tif_image->file_id;
             $objImage->save();
             
             $image1 = FsScanHumphreyXml::model()->find('id=' . $xml_id);
