@@ -4,12 +4,7 @@
  * Taken and adapted from:
  *  http://www.yiiframework.com/wiki/175/how-to-create-a-rest-api/
  */
-class RestfulController extends Controller {
-  
-  /**
-   * Key which has to be in HTTP USERNAME and PASSWORD headers 
-   */
-  Const APPLICATION_ID = 'ASCCPE';
+abstract class RestfulController extends Controller {
 
   /**
    * @return array action filters
@@ -17,17 +12,35 @@ class RestfulController extends Controller {
   public function filters() {
     return array();
   }
+  
+  /**
+   * 
+   */
+  abstract function getViewableModels();
+  /**
+   * 
+   */
+  abstract function getCreatableModels();
+  /**
+   * 
+   */
+  abstract function getUpdatableModels();
+  /**
+   * 
+   */
+  abstract function getSearchableModels();
 
+  
+  /**
+   * Key which has to be in HTTP USERNAME and PASSWORD headers 
+   */
+  abstract function getApplicationId();
+  
   /**
    * Perform a get with ID (view), get without ID (list), create (post) or
    * update (put) with ID.
    */
-  public function actionRest() { 
-    // until this has been fully adapted and modifed, localhost access only
-    // TODO remove when API is more mature 
-    if (Yii::app()->request->getBaseUrl(true) != 'http://localhost') {
-      return;
-    }
+  public function actionRest() {
     $this->_checkAuth();
     $requestMethod = $_SERVER['REQUEST_METHOD'];
     switch ($requestMethod) {
@@ -73,6 +86,9 @@ class RestfulController extends Controller {
    * @param type $model
    */
   private function viewAll($model) {
+    if (!in_array($model, $this->getViewableModels())) {
+      $this->_sendResponse(500, 'Error: REST transation are not supported for ' . $model);
+    }
     // Get the respective model instance
     try {
       $class_name = new $model;
@@ -102,6 +118,9 @@ class RestfulController extends Controller {
    * @param type $model
    */
   private function search($model) {
+    if (!in_array($model, $this->getSearchableModels())) {
+      $this->_sendResponse(500, 'Error: REST transation are not supported for ' . $model);
+    }
     // Get the respective model instance
     $json = file_get_contents('php://input');
     $put_vars = CJSON::decode($json, true);  
@@ -111,7 +130,24 @@ class RestfulController extends Controller {
       foreach ($put_vars as $var => $value) {
         // Does the model have this attribute? If not raise an error
         if ($search->hasAttribute($var)) {
-          $criteria->compare($var,$value); 
+          $value = urldecode($value);
+          // default operator is equality:
+          $operator = '=';
+          if (strpos($value, '< ') > -1) {
+            $operator = '<';
+          } else if (strpos($value, '<= ') > -1) {
+            $operator = '<=';
+          } else if (strpos($value, '> ') > -1) {
+            $operator = '>=';
+          } else if (strpos($value, '>= ') > -1) {
+            $operator = '>=';
+          } else if (strpos($value, '!= ') > -1) {
+            $operator = '!=';
+          }
+          if ($operator != '=') {
+            $value = substr($value, strpos($value, ' ') + 1);
+          }
+          $criteria->addCondition($var . $operator . '\'' . $value . '\'');
         }
         else
           $this->_sendResponse(500, sprintf('Parameter \'%s\' is not allowed for model \'%s\' - json was \'%s\'', $var, $model, $json));
@@ -126,7 +162,7 @@ class RestfulController extends Controller {
     // Did we get some results?
     if (empty($models)) {
       // No
-      $this->_sendResponse(200, sprintf('No items where found for model \'%s\'', $model));
+      $this->_sendResponse(400, sprintf('No items where found for model \'%s\'', $model));
     } else {
       // Prepare response
       $rows = array();
@@ -144,6 +180,9 @@ class RestfulController extends Controller {
    * @param type $model
    */
   private function view($id, $model) {
+    if (!in_array($model, $this->getViewableModels())) {
+      $this->_sendResponse(500, 'Error: REST transation are not supported for ' . $model);
+    }
     // Check if id was submitted via GET
     if (!isset($id)) {
       $this->_sendResponse(500, 'Error: Parameter id is missing');
@@ -178,6 +217,9 @@ class RestfulController extends Controller {
    * @param model $model
    */
   private function create($model) {
+    if (!in_array($model, $this->getCreatableModels())) {
+      $this->_sendResponse(500, 'Error: REST transation are not supported for ' . $model);
+    }
     $json = file_get_contents('php://input'); //$GLOBALS['HTTP_RAW_POST_DATA'] is not preferred: http://www.php.net/manual/en/ini.core.php#ini.always-populate-raw-post-data
     $put_vars = CJSON::decode($json, true);  //true means use associative array
     // Try to assign POST values to attributes
@@ -223,6 +265,9 @@ class RestfulController extends Controller {
    * @param type $model
    */
   private function update($id, $model) {
+    if (!in_array($model, $this->getUpdatableModels())) {
+      $this->_sendResponse(500, 'Error: REST transation are not supported for ' . $model);
+    }
     // Parse the PUT parameters. This didn't work: parse_str(file_get_contents('php://input'), $put_vars);
 //    parse_str(file_get_contents('php://input'), $put_vars);
     $json = file_get_contents('php://input'); //$GLOBALS['HTTP_RAW_POST_DATA'] is not preferred: http://www.php.net/manual/en/ini.core.php#ini.always-populate-raw-post-data
@@ -295,7 +340,7 @@ class RestfulController extends Controller {
    * @param string $body
    * @param type $content_type
    */
-  private function _sendResponse($status = 200, $body = '', $content_type = 'text/html') {
+  protected function _sendResponse($status = 200, $body = '', $content_type = 'text/html') {
     // set the status
     $status_header = 'HTTP/1.1 ' . $status . ' ' . $this->_getStatusCodeMessage($status);
     header($status_header);
@@ -360,7 +405,7 @@ class RestfulController extends Controller {
    * @param type $status
    * @return type
    */
-  private function _getStatusCodeMessage($status) {
+  protected function _getStatusCodeMessage($status) {
     // these could be stored in a .ini file and loaded
     // via parse_ini_file()... however, this will suffice
     // for an example
@@ -380,22 +425,29 @@ class RestfulController extends Controller {
   /**
    * 
    */
-  private function _checkAuth() {
+  protected function _checkAuth() {
+    if (Yii::app()->params['esb_rest_api_on'] != 'true') {
+      $this->_sendResponse(500, 'Error: There is no REST API: ' . Yii::app()->params['esb_rest_api_on']);
+    }
     // Check if we have the USERNAME and PASSWORD HTTP headers set? 
-    if (!(isset($_SERVER['HTTP_X_' . self::APPLICATION_ID . '_USERNAME']) and isset($_SERVER['HTTP_X_' . self::APPLICATION_ID . '_PASSWORD']))) {
+    if (!(isset($_SERVER['HTTP_X_' . $this->getApplicationId() . '_USERNAME']) and isset($_SERVER['HTTP_X_' . $this->getApplicationId() . '_PASSWORD']))) {
       // Error: Unauthorized 
       $this->_sendResponse(401);
     }
-    $username = $_SERVER['HTTP_X_' . self::APPLICATION_ID . '_USERNAME'];
-    $password = $_SERVER['HTTP_X_' . self::APPLICATION_ID . '_PASSWORD'];
+    $username = $_SERVER['HTTP_X_' . $this->getApplicationId() . '_USERNAME'];
+    $password = $_SERVER['HTTP_X_' . $this->getApplicationId() . '_PASSWORD'];
+    
+    if (!in_array($username, Yii::app()->params['esb_rest_api_users'])) {
+      $this->_sendResponse(401, 'Error: Permissions.');
+    }
     // Find the user 
     $user = User::model()->find('LOWER(username)=?', array(strtolower($username)));
     if ($user === null) {
       // Error: Unauthorized 
-      $this->_sendResponse(401, 'Error: User Name is invalid');
+      $this->_sendResponse(401, 'Error: Invalid login parameters.');
     } else if (!$user->validatePassword($password)) {
       // Error: Unauthorized 
-      $this->_sendResponse(401, 'Error: User Password is invalid');
+      $this->_sendResponse(401, 'Error: Invalid login parameters.');
     }
   }
 
