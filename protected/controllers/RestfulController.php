@@ -40,7 +40,7 @@ abstract class RestfulController extends Controller {
    * Perform a get with ID (view), get without ID (list), create (post) or
    * update (put) with ID.
    */
-  public function actionRest() { 
+  public function actionRest() {
     $this->_checkAuth();
     $requestMethod = $_SERVER['REQUEST_METHOD'];
     switch ($requestMethod) {
@@ -86,6 +86,9 @@ abstract class RestfulController extends Controller {
    * @param type $model
    */
   private function viewAll($model) {
+    if (!in_array($model, $this->getViewableModels())) {
+      $this->_sendResponse(500, 'Error: REST transation are not supported for ' . $model);
+    }
     // Get the respective model instance
     try {
       $class_name = new $model;
@@ -423,7 +426,9 @@ abstract class RestfulController extends Controller {
    * 
    */
   protected function _checkAuth() {
-    $f = $this->getApplicationId();
+    if (Yii::app()->params['esb_rest_api_on'] != 'true') {
+      $this->_sendResponse(500, 'Error: There is no REST API: ' . Yii::app()->params['esb_rest_api_on']);
+    }
     // Check if we have the USERNAME and PASSWORD HTTP headers set? 
     if (!(isset($_SERVER['HTTP_X_' . $this->getApplicationId() . '_USERNAME']) and isset($_SERVER['HTTP_X_' . $this->getApplicationId() . '_PASSWORD']))) {
       // Error: Unauthorized 
@@ -431,14 +436,18 @@ abstract class RestfulController extends Controller {
     }
     $username = $_SERVER['HTTP_X_' . $this->getApplicationId() . '_USERNAME'];
     $password = $_SERVER['HTTP_X_' . $this->getApplicationId() . '_PASSWORD'];
+    
+    if (!in_array($username, Yii::app()->params['esb_rest_api_users'])) {
+      $this->_sendResponse(401, 'Error: Permissions.');
+    }
     // Find the user 
     $user = User::model()->find('LOWER(username)=?', array(strtolower($username)));
     if ($user === null) {
       // Error: Unauthorized 
-      $this->_sendResponse(401, 'Error: User Name is invalid');
+      $this->_sendResponse(401, 'Error: Invalid login parameters.');
     } else if (!$user->validatePassword($password)) {
       // Error: Unauthorized 
-      $this->_sendResponse(401, 'Error: User Password is invalid');
+      $this->_sendResponse(401, 'Error: Invalid login parameters.');
     }
   }
 

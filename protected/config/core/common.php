@@ -169,5 +169,17 @@ return array(
         'hos_num_regex' => '/^([0-9]{1,9})$/',
         'pad_hos_num' => '%07s',
         'apache_user' => 'www-data',
+        'esb_rest_api_users' => array('mirth'),
+        'esb_rest_api_on' => 'true',
+        'esb_rest_api_viewable' => array('Patient',
+            'OphInVisualfields_Testtype', 'OphInVisualfields_Strategy',
+            'EventType'),
+        'esb_rest_api_updatable' => array('FsFile', 'FsDirectory',
+            'FsScanHumphreyImage', 'FsScanHumphreyXml',
+            'Element_OphInVisualfields_Testtype',
+            'Element_OphInVisualfields_Details',
+            'Element_OphInVisualfields_Image', 'ScannedDocumentUid',
+            'Episode', 'Event'),
+        'esb_rest_api_id' => 'ASCCPE'
     )
 );

@@ -6,32 +6,22 @@
  */
 class EsbRestApiController extends RestfulController {
   
-  /**
-   * Key which has to be in HTTP USERNAME and PASSWORD headers 
-   */
-  Const APPLICATION_ID = 'ASCCPE';
-
   function getViewableModels() {
-    return array_merge($this->getCreatableModels(), array('Patient',
-        'OphInVisualfields_Testtype', 'OphInVisualfields_Strategy',
-        'EventType'));
+    return array_merge($this->getCreatableModels(), 
+            Yii::app()->params['esb_rest_api_viewable']);
   }
   function getCreatableModels() {
     return $this->getUpdatableModels();
   }
   function getUpdatableModels() {
-    return array('FsFile', 'FsDirectory', 'FsScanHumphreyImage',
-        'FsScanHumphreyXml', 'Element_OphInVisualfields_Testtype',
-        'Element_OphInVisualfields_Details', 'Element_OphInVisualfields_Image',
-        'ScannedDocumentUid',
-        'Episode', 'Event');
+    return Yii::app()->params['esb_rest_api_updatable'];
   }
   function getSearchableModels() {
     return $this->getViewableModels();
   }
   
   public function getApplicationId() {
-    return 'ASCCPE';
+    return Yii::app()->params['esb_rest_api_id'];
   }
   
   function actionRest() {
@@ -42,7 +32,7 @@ class EsbRestApiController extends RestfulController {
    * 
    */
   function actionCreateHumphreyImagePairEvent() {
-    
+    $this->_checkAuth();
     if (!isset($_GET['patient_id'])) {
       $this->_sendResponse(500, 'Error: Parameter pid is missing');
     }
@@ -67,17 +57,23 @@ class EsbRestApiController extends RestfulController {
       $episodes = Episode::model()->findAll('patient_id=' . $patient->id);
       if (count($episodes) == 1) {
         
-          $createdDate = date('o-m-d H:i:s');
-          $timestamp = time() - (60 * 60 * 1000);
-          $date = date('o-m-d H:i:s', $timestamp);
           $xml_image = FsScanHumphreyXml::model()->find('id=' . $xml_id);
 
+          $createdDate = new DateTime($xml_image->study_date);
+          $createdTime = new DateTime($xml_image->study_date . ' ' . $xml_image->study_time);
+          $x = $createdTime->sub(new DateInterval('PT1H2M'))->format('H:i:s');
+          $preTime = $createdTime->sub(new DateInterval('PT1H2M'));
+          $t = $preTime->format('H:i:s');
+          $y = $createdDate->format('Y-m-d');
           $eye = 'L';
           if ($xml_image->eye == 'L') {
             $eye = 'R';
           }
           $images = FsScanHumphreyXml::model()->findAll(
-                  'pid=\'' . $patient->hos_num . '\' and created_date>=\'' . $date . '\' and associated=0 and eye=\'' . $eye . '\''
+                  'pid=\'' . $patient->hos_num
+                  . '\' and study_date>=\'' . $createdDate->format('Y-m-d')
+                  . '\' and study_time>=\'' . $preTime->format('H:i:s')
+                  . '\' and associated=0 and eye=\'' . $eye . '\''
                   );
           if (count($images) > 0) {
             $tifCriteria = new CDbCriteria;
@@ -99,10 +95,28 @@ class EsbRestApiController extends RestfulController {
             $event = new Event;
             $event->episode_id = $episodes[0]->id;
             $event->event_type_id = $event_type->id;
-            $event->created_user_id=1;
-            $event->created_date=$createdDate;
-            $event->datetime=$createdDate;
-            $event->save();
+            
+            $username = $_SERVER['HTTP_X_' . $this->getApplicationId() . '_USERNAME'];
+            $event->created_user_id = User::model()->find('username=\'' . $username. '\'')->id;
+            $event->created_date = date($xml_image->study_date
+                    . ' ' . $xml_image->study_time);
+            $event->last_modified_date = date($xml_image->study_date
+                    . ' ' . $xml_image->study_time);
+            $t = $event->created_date;
+            $event->datetime= date($xml_image->study_date
+                    . ' ' . $xml_image->study_time);
+            $event->save($allow_overriding=true);
+            
+            $event->created_user_id = User::model()->find('username=\'' . $username. '\'')->id;
+            $event->created_date = date($xml_image->study_date
+                    . ' ' . $xml_image->study_time);
+            $t = $event->created_date;
+            $event->datetime= date($xml_image->study_date
+                    . ' ' . $xml_image->study_time);
+            $event->last_modified_date = date($xml_image->study_date
+                    . ' ' . $xml_image->study_time);
+            $event->save($allow_overriding=true);
+            
             $objTestType = new Element_OphInVisualfields_Testtype;
             $objTestType->event_id = $event->id;
             $objTestType->test_type_id = $testType->id;
