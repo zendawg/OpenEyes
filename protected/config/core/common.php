@@ -169,17 +169,60 @@ return array(
         'hos_num_regex' => '/^([0-9]{1,9})$/',
         'pad_hos_num' => '%07s',
         'apache_user' => 'www-data',
+        
+        // at least one user must be in the database for the API to work
         'esb_rest_api_users' => array('mirth'),
+        // API requests only work when true; otherwise requests are ignored
         'esb_rest_api_on' => 'true',
+        // Under legacy mode, all images will be paired with a legacy image
+        // event; otherwise, the events will be generated based on the number
+        // of episodes and specialities
+        'esb_rest_api_legacy_mode' => array('default' => false,
+            'humphreys' => false),
+        // Ignored if legacy mode is not true. When a patient has at least one
+        // episode, each episode speciality that matches the image type's array
+        // of specialities is bound to an event for that episode - this enables
+        // multiple specialities to keep tabs on the same imported images:
+        'esb_rest_api_image_specialities' => array(
+            'humphreys' => array('Glaucoma', 'Cataract', 'Medical Retinal')),
+        // when searching for previous VFA images to create a new visual field
+        // event, go back this many milliseconds for other non-associated
+        // images. If 0, ignore and search back all records; otherwise,
+        // specified in PHP TimeInterval format
+        'esb_rest_api_humphrey_event_bond_time' => 'PT1H2M',
+        /* Although for demo purposes it is acceptable to place images
+         * directly in the root of openeyes, there are other times, especially
+         * for clinical use, where the real paths will be external to the
+         * site directory (and will be sym-linked from say $SITE_DIR/images,
+         * for example). Note also that file's stored within openeyes are
+         * absolute ('real') system paths. The array specifies the
+         * 'real' file system path, separated by a colon and a replacement
+         * (internal to openeyes) path. For example, if 'default'
+         * specified '/var/openeyes:/images' as it's path, then all occurrences 
+         * of '/var/openeyes' will be replaced with '/images' when
+         * building file names for images. This enables OE to correctly
+         * display images without exposing their real path.
+         */
+        'esb_rest_api_file_system_paths' => array('default' =>
+            '/var/openeyes:/images', 'humphreys' => '/var/openeyes:/images'),
+        /*
+         * 
+         */
         'esb_rest_api_viewable' => array('Patient',
             'OphInVisualfields_Testtype', 'OphInVisualfields_Strategy',
             'EventType'),
-        'esb_rest_api_updatable' => array('FsFile', 'FsDirectory',
+        /*
+         * 
+         */
+        'esb_rest_api_updatable' => array('FsFile', 'FsDirectory', 'FsFileAudit',
             'FsScanHumphreyImage', 'FsScanHumphreyXml',
             'Element_OphInVisualfields_Testtype',
             'Element_OphInVisualfields_Details',
             'Element_OphInVisualfields_Image', 'ScannedDocumentUid',
             'Episode', 'Event'),
+        /*
+         * 
+         */
         'esb_rest_api_id' => 'ASCCPE'
     )
 );
