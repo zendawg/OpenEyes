@@ -203,6 +203,8 @@ abstract class RestfulController extends Controller {
                       'Error loading model \'%s\'', $model));
       Yii::app()->end();
     }
+    $x = $model;
+    $y = is_null($model);
     // Did we find the requested model? If not, raise an error
     if (is_null($model))
       $this->_sendResponse(404, 'No Item found with id ' . $id);
@@ -226,7 +228,7 @@ abstract class RestfulController extends Controller {
 
     try {
       // check is supported
-      $model = new $model;
+      $obj = new $model;
     } catch (Exception $e) {
       $this->_sendResponse(501, sprintf(
                       'Error loading model \'%s\'', $model));
@@ -234,20 +236,20 @@ abstract class RestfulController extends Controller {
     }
     foreach ($put_vars as $var => $value) {
       // Does the model have this attribute? If not raise an error
-      if ($model->hasAttribute($var))
-        $model->$var = $value;
+      if ($obj->hasAttribute($var))
+        $obj->$var = $value;
       else
         $this->_sendResponse(500, sprintf('Parameter \'%s\' is not allowed for model \'%s\'', $var, $model));
     }
     // Try to save the model
-    if ($model->save())
-      $this->_sendResponse(200, CJSON::encode($model));
+    if ($obj->save())
+      $this->_sendResponse(200, CJSON::encode($obj));
     else {
       // Errors occurred
       $msg = "<h1>Error</h1>";
       $msg .= sprintf("Couldn't create model \'%s\'", $model);
       $msg .= "<ul>";
-      foreach ($model->errors as $attribute => $attr_errors) {
+      foreach ($obj->errors as $attribute => $attr_errors) {
         $msg .= "<li>Attribute: $attribute</li>";
         $msg .= "<ul>";
         foreach ($attr_errors as $attr_error)

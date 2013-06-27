@@ -176,10 +176,11 @@ return array(
         'esb_rest_api_on' => 'true',
         // Under legacy mode, all images will be paired with a legacy image
         // event; otherwise, the events will be generated based on the number
-        // of episodes and specialities
+        // of episodes and specialities (and will appear in the main
+        // appropriate episode
         'esb_rest_api_legacy_mode' => array('default' => false,
             'humphreys' => false),
-        // Ignored if legacy mode is not true. When a patient has at least one
+        // Ignored if legacy mode is false. When a patient has at least one
         // episode, each episode speciality that matches the image type's array
         // of specialities is bound to an event for that episode - this enables
         // multiple specialities to keep tabs on the same imported images:
@@ -208,9 +209,8 @@ return array(
         /*
          * 
          */
-        'esb_rest_api_viewable' => array('Patient',
-            'OphInVisualfields_Testtype', 'OphInVisualfields_Strategy',
-            'EventType'),
+        'esb_rest_api_viewable' => array('OphInVisualfields_Testtype',
+            'OphInVisualfields_Strategy', 'EventType'),
         /*
          * 
          */

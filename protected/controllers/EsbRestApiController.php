@@ -53,7 +53,7 @@ class EsbRestApiController extends RestfulController {
     $test_strategy = $_GET['test_strategy'];
 
     $event_type = EventType::model()->find('class_name=\'OphInVisualfields\'');
-    $patient = Patient::model()->find('hos_num=' . $pid);
+    $patient = Patient::model()->find('hos_num=\'' . $pid . '\'');
 
     $xml_image = FsScanHumphreyXml::model()->find('id=' . $xml_id);
 

@@ -13,10 +13,8 @@
  * @property string $last_modified_date
  * @property string $created_user_id
  * @property string $created_date
- * @property string $asset_id
  *
  * The followings are the available model relations:
- * @property Asset $asset
  * @property User $createdUser
  * @property User $lastModifiedUser
  * @property FsDirectory $dir
@@ -55,11 +53,11 @@ class FsFile extends CActiveRecord
 			array('length', 'numerical', 'integerOnly'=>true),
 			array('name', 'length', 'max'=>128),
 			array('modified', 'length', 'max'=>20),
-			array('dir_id, last_modified_user_id, created_user_id, asset_id', 'length', 'max'=>10),
+			array('dir_id, last_modified_user_id, created_user_id', 'length', 'max'=>10),
 			array('last_modified_date, created_date', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, name, modified, length, dir_id, last_modified_user_id, last_modified_date, created_user_id, created_date, asset_id', 'safe', 'on'=>'search'),
+			array('id, name, modified, length, dir_id, last_modified_user_id, last_modified_date, created_user_id, created_date', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -71,7 +69,6 @@ class FsFile extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'asset' => array(self::BELONGS_TO, 'Asset', 'asset_id'),
 			'createdUser' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 			'lastModifiedUser' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
 			'dir' => array(self::BELONGS_TO, 'FsDirectory', 'dir_id'),
@@ -94,7 +91,6 @@ class FsFile extends CActiveRecord
 			'last_modified_date' => 'Last Modified Date',
 			'created_user_id' => 'Created User',
 			'created_date' => 'Created Date',
-			'asset_id' => 'Asset',
 		);
 	}
 
@@ -118,7 +114,6 @@ class FsFile extends CActiveRecord
 		$criteria->compare('last_modified_date',$this->last_modified_date,true);
 		$criteria->compare('created_user_id',$this->created_user_id,true);
 		$criteria->compare('created_date',$this->created_date,true);
-		$criteria->compare('asset_id',$this->asset_id,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
