@@ -23,5 +23,5 @@ if (isset($patient_exists)) {
 <?php // echo $this->renderPartial('_form', array('model'=>$model)); ?>
 <?php
 $patient = new Patient();
-echo $this->renderPartial('_form', array('model' => $patient));
+echo $this->renderPartial('_form', array('model' => $patient, 'action' => 'Create'));
 ?>

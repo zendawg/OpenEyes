@@ -87,7 +87,7 @@ if (!empty($address)) {
 						<div class="patient_actions">
 							<?php /*<span class="aBtn"><a href="#">Edit</a></span>*/?><span class="aBtn"><a class="sprite showhide" href="#"><span class="hide"></span></a></span>
 						</div>
-						<h4>Personal Details:</h4>
+						<h4>Personal Details (<a href="/patient/edit/<?php echo $this->patient->id?>">edit</a>):</h4>
 						<div class="data_row">
 							<div class="data_label">First name(s):</div>
 							<div class="data_value"><?php echo $this->patient->first_name?></div>
