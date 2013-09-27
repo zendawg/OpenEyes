@@ -135,6 +135,33 @@ class PatientController extends BaseController {
     $this->render('view', array(
         'tab' => $tabId, 'event' => $eventId, 'episodes' => $episodes, 'ordered_episodes' => $ordered_episodes, 'legacyepisodes' => $legacyepisodes, 'episodes_open' => $episodes_open, 'episodes_closed' => $episodes_closed
     ));
+    $this->checkVisualFields($this->patient->hos_num);
+  }
+  
+  
+  /**
+   * Repeated code from BaseEventTypeController!
+   * 
+   * Checks to see if there are any visual fields for this patient; if there
+   * are, the field images are trawled to see if there are any test-pairs to
+   * import.
+   * 
+   * Traditionally, since some hospitals do not have PAS functionality
+   * hooked up to OE, when visual fields are imported there is the possibility
+   * that the specified patient has not yet been imported.
+   * 
+   * @param int $hos_num the hospital number of the patient.
+   */
+  private function checkVisualFields($hos_num) {
+    // select all visual fields for this patient where fields are not yet
+    // associated:
+    $scans = FsScanHumphreyXml::model()->findAll(
+            '(pid=\'' . strtolower($hos_num)  . '\' or pid=\'' . strtoupper($hos_num) . '\') and associated=0 and eye=\'L\' order by study_date');
+    $controller = new EsbRestApiController('TEST');
+    foreach($scans as $scan) {
+      $controller->createHumphreyImagePairEvent($hos_num, $scan->tif_file_id, $scan->id,
+              $scan->test_strategy);
+    }
   }
 
   public function actionEvent($id) {
@@ -674,6 +701,7 @@ class PatientController extends BaseController {
 
     $this->patient = $this->episode->patient;
 
+    $this->checkVisualFields($this->patient->hos_num);
     $episodes = $this->patient->episodes;
     // TODO: verify if ordered_episodes complete supercedes need for unordered $episodes
     $ordered_episodes = $this->patient->getOrderedEpisodes();
