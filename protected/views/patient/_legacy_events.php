@@ -16,60 +16,64 @@
  * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
+if (isset(Yii::app()->params['legacy_event_types'])) foreach (Yii::app ()->params['legacy_event_types'] as $legacy_event_type) {
+  $legacyevents = EventType::model()->find('class_name=?', array($legacy_event_type));
 
-$legacyletters = EventType::model()->find('class_name=?', array('OphLeEpatientletter'));
+  if ($legacyevents && !$legacyevents->disabled && is_array($legacyepisodes))
+    foreach ($legacyepisodes as $i => $episode) {
+      ?>
+      <div class="episode open clearfix" style="display:block;">
+        <div class="episode_nav legacy">
+          <div class="start_date small">
+            <?php echo $episode->NHSDate('start_date') ?>
+            <span class="aBtn">
+              <a class="sprite showhide2 legacy" href="#">
+                <span class="<?php if ((!$this->event || $this->event->eventType->class_name != 'OphLeEpatientletter') && !@Yii::app()->session['episode_hide_status']['legacy']) { ?>show<?php } else { ?>hide<?php } ?>"></span>
+              </a>
+            </span>
+          </div>
+          <h4 class="legacy" style="margin-left: 8px;">Legacy events</h4>
 
-if ($legacyletters && !$legacyletters->disabled && is_array($legacyepisodes)) foreach ($legacyepisodes as $i => $episode) {?>
-	<div class="episode open clearfix" style="display:block;">
-		<div class="episode_nav legacy">
-			<div class="start_date small">
-				<?php echo $episode->NHSDate('start_date') ?>
-				<span class="aBtn">
-					<a class="sprite showhide2 legacy" href="#">
-						<span class="<?php if ((!$this->event || $this->event->eventType->class_name != 'OphLeEpatientletter') && !@Yii::app()->session['episode_hide_status']['legacy']) { ?>show<?php } else { ?>hide<?php } ?>"></span>
-					</a>
-				</span>
-			</div>
-			<h4 class="legacy" style="margin-left: 8px;">Legacy events</h4>
 
+          <ul class="events"<?php if ((!$this->event || $this->event->eventType->class_name != 'OphLeEpatientletter') && !@Yii::app()->session['episode_hide_status']['legacy']) { ?> style="display: none;"<?php } ?>>
+            <?php
+            foreach ($episode->events as $event) {
+              $highlight = false;
 
-			<ul class="events"<?php if ((!$this->event || $this->event->eventType->class_name != 'OphLeEpatientletter') && !@Yii::app()->session['episode_hide_status']['legacy']) { ?> style="display: none;"<?php } ?>>
-				<?php
-				foreach ($episode->events as $event) {
-					$highlight = false;
+              if (isset($this->event) && $this->event->id == $event->id) {
+                $highlight = TRUE;
+              }
 
-					if (isset($this->event) && $this->event->id == $event->id) {
-						$highlight = TRUE;
-					}
-
-					$event_path = Yii::app()->createUrl($event->eventType->class_name . '/Default/view') . '/';
-					?>
-					<li id="eventLi<?php echo $event->id ?>">
-						<div class="quicklook" style="display: none; ">
-							<span class="event"><?php echo $event->eventType->name ?></span>
-							<span class="info"><?php echo str_replace("\n", "<br/>", $event->info) ?></span>
-							<?php if ($event->hasIssue()) { ?>
-								<span class="issue"><?php echo $event->getIssueText() ?></span>
-							<?php } ?>
-						</div>
-						<?php if ($highlight) { ?>
-							<div class="viewing">
-							<?php } else { ?>
-								<a style="color:#999;" href="<?php echo $event_path . $event->id ?>" rel="<?php echo $event->id ?>" class="show-event-details">
-								<?php } ?>
-								<span class="type<?php if ($event->hasIssue()) { ?> statusflag<?php } ?>">
-									<?php $assetpath = Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('application.modules.' . $event->eventType->class_name . '.assets')) . '/'; ?>
-									<img src="<?php echo Yii::app()->createUrl($assetpath . 'img/small.png') ?>" alt="op" width="19" height="19" />
-								</span>
-								<span class="date"> <?php echo $event->NHSDateAsHTML('created_date'); ?></span>
-								<?php if (!$highlight) { ?>
-								</a>
-							<?php } else { ?>
-							</div>
-						<?php } ?>
-					</li>
-				<?php } ?>
-			</ul>
-		</div>
-	</div>
-<?php }?>
+              $event_path = Yii::app()->createUrl($event->eventType->class_name . '/Default/view') . '/';
+              ?>
+              <li id="eventLi<?php echo $event->id ?>">
+                <div class="quicklook" style="display: none; ">
+                  <span class="event"><?php echo $event->eventType->name ?></span>
+                  <span class="info"><?php echo str_replace("\n", "<br/>", $event->info) ?></span>
+                  <?php if ($event->hasIssue()) { ?>
+                    <span class="issue"><?php echo $event->getIssueText() ?></span>
+                  <?php } ?>
+                </div>
+                <?php if ($highlight) { ?>
+                  <div class="viewing">
+                  <?php } else { ?>
+                    <a style="color:#999;" href="<?php echo $event_path . $event->id ?>" rel="<?php echo $event->id ?>" class="show-event-details">
+                    <?php } ?>
+                    <span class="type<?php if ($event->hasIssue()) { ?> statusflag<?php } ?>">
+                      <?php $assetpath = Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('application.modules.' . $event->eventType->class_name . '.assets')) . '/'; ?>
+                      <img src="<?php echo Yii::app()->createUrl($assetpath . 'img/small.png') ?>" alt="op" width="19" height="19" />
+                    </span>
+                    <span class="date"> <?php echo $event->NHSDateAsHTML('created_date'); ?></span>
+                    <?php if (!$highlight) { ?>
+                    </a>
+                  <?php } else { ?>
+                  </div>
+                <?php } ?>
+              </li>
+            <?php } ?>
+          </ul>
+        </div>
+      </div>
+    <?php }
+}
+?>
