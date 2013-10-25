@@ -12,7 +12,18 @@
  */
 class FlotChart implements JScriptChart {
 
+  /**
+   *
+   * @var arary an associative array of varName => array() values, where varName
+   * reflects the names of (javascript) variables configured per set of points;
+   * the variable must match the variable name specified in addPlots(). The
+   * array of points should be an associative array of the index on the chart
+   * (0, ..., n) and the point data per index.
+   */
   private $plots = array();
+  /** The array of plot information per line set; is an associative array of
+   * (javascript) variable name to an associative array of values for
+   * configuring the points (e.g. label, points, lines etc.). */
   private $plotData = array();
   private $xAxisZoomRange = null;
   private $yAxisZoomRange = null;
@@ -23,10 +34,9 @@ class FlotChart implements JScriptChart {
   private $timeData = false;
   private $hover = false;
   private $hoverText;
-  private $divName = null;
 
   /**
-   * 
+   * Registers the script for this class.
    * @param type $scriptName
    */
   public function registerScript($scriptName) {
@@ -49,6 +59,17 @@ class FlotChart implements JScriptChart {
     $this->yAxisZoomRange = array($min, $max);
   }
 
+  /**
+   * Add a single set of plots (can be called several times).
+   * 
+   * @param string $var_name the javscript name of the plots.
+   * @param array $data the array of points to lot, should be as an associative
+   * array of x/y values.
+   * @param string $label the label for the legend of the plots (displayed on
+   * the graph).
+   * @param bool $showLines join points up with lines?
+   * @param bool $showPoints show points?
+   */
   public function addPlots($var_name, $data, $label, $showLines = true, $showPoints = true) {
     $this->plots = $this->array_push_assoc($this->plots, $var_name, $data);
     $tmp = array();
@@ -61,8 +82,10 @@ class FlotChart implements JScriptChart {
 
   /**
    * 
-   * @param type $min
-   * @param type $max
+   * Set the y axis data.
+   * 
+   * @param array $data an array of data values for the labels.
+   * @param bool $timedata true if the elements are dates; false otherwise.
    */
   function setYAxisLabels($data, $timedata = false) {
     $this->timeData = $timedata;
@@ -70,30 +93,35 @@ class FlotChart implements JScriptChart {
   }
 
   /**
+   * Set the X axis data.
    * 
-   * @param type $min
-   * @param type $max
+   * @param array $data an array of data values for the labels.
    */
   function setXAxisLabels($data) {
     $this->xAxisLabels = $data;
   }
 
   /**
+   * Display information about a point when the mouse hovers over it.
    * 
-   * @param type $div_id
-   * @param type $top
-   * @param type $left
-   * @param type $borderPx
-   * @param type $borderStyle
-   * @param type $borderColour
-   * @param type $paddingPx
-   * @param type $bgColour
-   * @param type $opacity
-   * @param type $fadeIn
-   * @param type $hoverDataDivId
-   * @param type $hoverDataLabel
+   * @param string $div_id the tooltip ID name for displaying the hover data.
+   * @param int $top offset (y) from the mouse pointer to set the tooltip.
+   * @param int $left offset (x) from the mouse pointer to set the tooltip.
+   * @param int $borderPx The pixel border size of the tooltip.
+   * @param int $borderStyle tooltip border style.
+   * @param string $borderColour colur of the tooltip border as a hex triplet.
+   * @param int $paddingPx padding pixel width.
+   * @param string $bgColour colour of the background tooltip as a hex triplet.
+   * @param float $opacity Opacity of the background of the tooltip.
+   * @param bool $fadeIn fade in? True or false.
+   * @param string $hoverDataDivId the div ID for the hover data.
+   * @param string $hoverDataLabel label for prefixing text to the hover
+   * output value.
    */
-  function addHover($div_id = 'tooltip', $top = -25, $left = 5, $borderPx = 1, $borderStyle = 'solid', $borderColour = 'fdd', $paddingPx = 2, $bgColour = 'fee', $opacity = 0.80, $fadeIn = 200, $hoverDataDivId = 'hoverdata', $hoverDataLabel = "Value: ") {
+  function addHover($div_id = 'tooltip', $top = -25, $left = 5, $borderPx = 1, 
+          $borderStyle = 'solid', $borderColour = 'fdd', $paddingPx = 2, 
+          $bgColour = 'fee', $opacity = 0.80, $fadeIn = 200, 
+          $hoverDataDivId = 'hoverdata', $hoverDataLabel = "Value: ") {
     $this->hover = true;
 
     $this->hoverText = "function showTooltip(x, y, contents) {"
@@ -127,11 +155,27 @@ class FlotChart implements JScriptChart {
             . "});";
   }
 
+  /**
+   * Pushes an element on to the array as a key/value pair.
+   * 
+   * @param array $array
+   * @param object $key
+   * @param object $value
+   * @return type array the returned array after pushing the associative
+   * array on to $array.
+   */
   public function array_push_assoc($array, $key, $value) {
     $array[$key] = $value;
     return $array;
   }
 
+  /**
+   * Get the script text for creating the chart.
+   * 
+   * @param string $divName the name to give to the DIV that the chart will
+   * reference.
+   * @return string the chart, not including ensclosing 'script' tags.
+   */
   public function toString($divName) {
 
     $data = "\$(function(){\n";
