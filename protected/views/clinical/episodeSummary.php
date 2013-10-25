@@ -16,145 +16,167 @@
  * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
+?>
+
+
+
+<h3>Summary</h3>
+<h3 class="episodeTitle"><?php echo $episode->support_services ? 'Support services' : $episode->firm->getSubspecialtyText() ?></h3>
+
+
+<?php
+
+function showCustomEpisode($episodeSummary) {
+  $episodes = Yii::app()->params['episode_summaries'];
+  $subspecialty = $episodeSummary->firm->serviceSubspecialtyAssignment->subspecialty;
+  $elements = $episodes[$subspecialty->name]['layout'];
+  // get each element, where the element is the last defined one in the episode:
+  foreach ($elements as $id => $element) {
+    // at this time, two definitions are possible - an event type-based
+    // configuration, where each element is loaded individually; or 
+    // (see below) a basic view is loaded:
+    if (isset($element['event_type'])) {
+      // class load the event type API:
+      $class_name = $element['event_type'] . '_API';
+      $path = $element['event_type'] . '.components.' . $class_name;
+      Yii::import($path, true);
+      $api = new $class_name();
+      $last_et = $api->getElementForLatestEventInEpisode($episodeSummary->patient, $episodeSummary->episode, $element['class_name']);
+      $var_name = 'element';
+      if ($last_et && ElementType::model()->find('class_name=:class_name', array(':class_name' => $element['class_name']))) {
+        $p = array($var_name => $last_et);
+        if (isset($element['params'])) {
+          foreach ($element['params'] as $name => $param) {
+            $p = array_merge($p, array($name => $param));
+          }
+        }
+        $view = $element['event_type'] . '.views.default._view_' . $element['class_name'];
+        if (isset($element['view'])) {
+          $view = $element['event_type'] . '.views.default.' . $element['view'];
+        }
+        if (isset($element['css_prefix'])) {
+          echo $element['css_prefix'];
+        }
+        $date = '';
+        if (isset($element['show_date'])) {
+          $date = $last_et->last_modified_date;
+        }
+        echo '<h4 class="elementTypeName">' . $id . ' (' . $date . ')</h4>';
+        $episodeSummary->renderPartial($view, $p);
+        if (isset($element['css_suffix'])) {
+          echo $element['css_suffix'];
+        }
+      }
+    } else {
+      // it's a basic view:
+      echo '<h4 class="elementTypeName">' . $id . '</h4>';
+      $episodeSummary->renderPartial($element['view'], array());
+    }
+  }
+}
 
 /* Custom episodes are episides that decide to define their own (config-defned)
  * layout, rather than having a summary in views/clinical/episodeSummaries:
  */
-$custom_episodes = isset(Yii::app()->params['episodes']);
-// summary is always shown, unless custom configuration states otherwise:
-$summary = true;
+$custom_episodes = isset(Yii::app()->params['episode_summaries']);
+
 
 if ($custom_episodes) {
   $subspecialty = $episode->firm->serviceSubspecialtyAssignment->subspecialty;
-  $summary = isset($custom_episodes[$subspecialty->name]['summary']);
-}
-
-if (!empty($episode)) {
-  if ($episode->diagnosis) {
-    $eye = $episode->eye ? $episode->eye->name : 'None';
-    $diagnosis = $episode->diagnosis ? $episode->diagnosis->term : 'none';
-  } else {
-    $eye = 'No diagnosis';
-    $diagnosis = 'No diagnosis';
-  }
-  if ($summary === 'true') {
-    $episode->audit('episode summary', 'view', false);
-    ?>
-
-    <h3>Summary</h3>
-    <h3 class="episodeTitle"><?php echo $episode->support_services ? 'Support services' : $episode->firm->getSubspecialtyText() ?></h3>
-
-    <?php $this->renderPartial('//base/_messages'); ?>
-
-    <h4>Principal diagnosis:</h4>
-
-    <div class="eventHighlight big">
-      <h4><?php echo $episode->diagnosis ? $episode->diagnosis->term : 'None' ?></h4>
-    </div>
-
-    <h4>Principal eye:</h4>
-
-    <div class="eventHighlight big">
-      <h4><?php echo $episode->eye ? $episode->eye->name : 'None' ?></h4>
-    </div>
-
-    <!-- divide into two columns -->
-    <div class="cols2 clearfix">
-      <div class="left">
-        <h4>Start Date</h4>
-        <div class="eventHighlight">
-          <h4><?php echo $episode->NHSDate('start_date') ?></h4>
-        </div>
-      </div>
-
-      <div class="right">
-        <h4>End date:</h4>
-        <div class="eventHighlight">
-          <h4><?php echo!empty($episode->end_date) ? $episode->NHSDate('end_date') : '(still open)' ?></h4>
-        </div>
-      </div>
-
-      <div class="left">
-        <h4>Subspecialty:</h4>
-        <div class="eventHighlight">
-          <h4><?php echo $episode->support_services ? 'Support services' : $episode->firm->getSubspecialtyText() ?></h4>
-        </div>
-      </div>
-
-      <div class="right">
-        <h4>Consultant firm:</h4>
-        <div class="eventHighlight">
-          <h4><?php echo $episode->firm ? $episode->firm->name : 'None' ?></h4>
-        </div>
-      </div>
-    </div> <!-- end of cols2 (column split) -->
-
-    <?php
-  }
   try {
-    /* This is where, if custom episodes are set, they are dynamically loaded.
-     * TODO they're very simplistic at the moment, and there are issues loading
-     * views from modules that contain other views within the same module. */
-    if ($custom_episodes) {
-      $episodes = Yii::app()->params['episodes'];
-      $subspecialty = $episode->firm->serviceSubspecialtyAssignment->subspecialty;
-      $elements = $episodes[$subspecialty->name]['layout'];
-      // get each element, where the element is the last defined one in the episode:
-      foreach ($elements as $id => $element) {
-        // at this time, two definitions are possible - an event type-based
-        // configuration, where each element is loaded individually; or 
-        // (see below) a basic view is loaded:
-        if (isset($element['event_type'])) {
-          // class load the event type API:
-          $class_name = $element['event_type'] . '_API';
-          $path = $element['event_type'] . '.components.' . $class_name;
-          Yii::import($path, true);
-          $api = new $class_name();
-          $last_et = $api->getElementForLatestEventInEpisode($this->patient, $this->episode, $element['class_name']);
-          $var_name = 'element';
-          if ($last_et && ElementType::model()->find('class_name=:class_name', array(':class_name' => $element['class_name']))) {
-            $p = array($var_name => $last_et);
-            if (isset($element['params'])) {
-              foreach ($element['params'] as $name => $param) {
-                $p = array_merge($p, array($name => $param));
-              }
-            }
-            $view = $element['event_type'] . '.views.default._view_' . $element['class_name'];
-            if (isset($element['view'])) {
-              $view = $element['event_type'] . '.views.default.' . $element['view'];
-            }
-            if (isset($element['css_prefix'])) {
-              echo $element['css_prefix'];
-            }
-            $date = '';
-            if (isset($element['show_date'])) {
-              $date = $last_et->last_modified_date;
-            }
-            echo '<h4 class="elementTypeName">' . $id . ' (' . $date . ')</h4>';
-            $this->renderPartial($view, $p);
-            if (isset($element['css_suffix'])) {
-              echo $element['css_suffix'];
-            }
-          }
-        } else {
-          // it's a basic view:
-          echo '<h4 class="elementTypeName">' . $id . '</h4>';
-          $this->renderPartial($element['view'], array());
-        }
-      }
-    } else if ($episode->firm) {
-      echo $this->renderPartial('/clinical/episodeSummaries/' . $episode->firm->getSubspecialtyID(), array('episode' => $episode));
-    }
-  } catch (Exception $e) {
-    // If there is no extra episode summary detail page for this subspecialty we don't care
+    $episode_views = Yii::app()->params['episode_summaries'][$subspecialty->name]['order'];
+  } catch(Exception $e) {
+    // config not defined, move on
   }
-} else {
-  // hide the episode border 
-  ?>
-  <script type="text/javascript">
-    $('div#episodes_details').hide();
-  </script>
-<?php } ?>
+}
+// if no user-defined config, just display the main (default) summary:
+if (!$episode_views) {
+  $episode_views = array('summary');
+}
+foreach ($episode_views as $ep_view) {
+  if ($ep_view === 'custom') {
+    showCustomEpisode($this);
+  }
+  if ($ep_view == 'firm') {
+    try {
+      /* This is where, if custom episodes are set, they are dynamically loaded.
+       * TODO they're very simplistic at the moment, and there are issues loading
+       * views from modules that contain other views within the same module. */
+      if ($episode->firm) {
+        echo $this->renderPartial('/clinical/episodeSummaries/' . $episode->firm->getSubspecialtyID(), array('episode' => $episode));
+      }
+    } catch (Exception $e) {
+      // If there is no extra episode summary detail page for this subspecialty we don't care
+    }
+  }
+  if ($ep_view === 'summary') {
+    if (!empty($episode)) {
+      if ($episode->diagnosis) {
+        $eye = $episode->eye ? $episode->eye->name : 'None';
+        $diagnosis = $episode->diagnosis ? $episode->diagnosis->term : 'none';
+      } else {
+        $eye = 'No diagnosis';
+        $diagnosis = 'No diagnosis';
+      }
+      $episode->audit('episode summary', 'view', false);
+      ?>
+      <?php $this->renderPartial('//base/_messages'); ?>
+
+      <h4>Principal diagnosis:</h4>
+
+      <div class="eventHighlight big">
+        <h4><?php echo $episode->diagnosis ? $episode->diagnosis->term : 'None' ?></h4>
+      </div>
+
+      <h4>Principal eye:</h4>
+
+      <div class="eventHighlight big">
+        <h4><?php echo $episode->eye ? $episode->eye->name : 'None' ?></h4>
+      </div>
+
+      <!-- divide into two columns -->
+      <div class="cols2 clearfix">
+        <div class="left">
+          <h4>Start Date</h4>
+          <div class="eventHighlight">
+            <h4><?php echo $episode->NHSDate('start_date') ?></h4>
+          </div>
+        </div>
+
+        <div class="right">
+          <h4>End date:</h4>
+          <div class="eventHighlight">
+            <h4><?php echo!empty($episode->end_date) ? $episode->NHSDate('end_date') : '(still open)' ?></h4>
+          </div>
+        </div>
+
+        <div class="left">
+          <h4>Subspecialty:</h4>
+          <div class="eventHighlight">
+            <h4><?php echo $episode->support_services ? 'Support services' : $episode->firm->getSubspecialtyText() ?></h4>
+          </div>
+        </div>
+
+        <div class="right">
+          <h4>Consultant firm:</h4>
+          <div class="eventHighlight">
+            <h4><?php echo $episode->firm ? $episode->firm->name : 'None' ?></h4>
+          </div>
+        </div>
+      </div> <!-- end of cols2 (column split) -->
+
+      <?php
+    } else {
+      // hide the episode border 
+      ?>
+      <script type="text/javascript">
+        $('div#episodes_details').hide();
+      </script>
+      <?php
+    }
+  }
+}
+?>
 
 <div class="metaData">
   <span class="info"><?php echo $episode->support_services ? 'Support services' : $episode->firm->getSubspecialtyText() ?>: created by <span class="user"><?php echo $episode->user->fullName ?> on <?php echo $episode->NHSDate('created_date') ?> at <?php echo substr($episode->created_date, 11, 5) ?></span></span>

@@ -110,8 +110,11 @@ $config = array(
         'specialty_codes' => array(130),
         //'default_site_code' => '',
         'specialty_sort' => array(130, 'SUP'),
-        'episodes' => array(
+        // defined customised views for episode summaries:
+        'episode_summaries' => array(
+            /*
             'Glaucoma' => array(
+                'order' => array('custom', 'summary', 'firm'),
                 'layout' => array(
                     'Last Recorded IOP' => array('event_type' => 'OphCiExamination',
                         'class_name' => 'Element_OphCiExamination_IntraocularPressure',
@@ -119,14 +122,14 @@ $config = array(
                     'IOP Summary' => array('view' => 'OphCiExamination.views.default._view_Element_OphCiExamination_IntraocularPressure_Plots'),
                     'Visual Fields' => array('view' => 'OphInVisualfields.views.default._view_Element_OphInVisualfields_Humphrey_Scan_Pair'),
                 ),
-                'summary' => 'false'
             ),
             'Medical Retinal' => array(
+                'order' => array('custom'),
                 'layout' => array(
                     'IOP Summary' => array('view' => 'OphCiExamination.views.default.view_Element_OphCiExamination_IntraocularPressure_Plots'),
                 ),
-                'summary' => 'false'
             ),
+            */
         ),
     ),
 );
