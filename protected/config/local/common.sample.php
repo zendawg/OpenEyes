@@ -80,7 +80,7 @@ $config = array(
     ),
     
     'params' => array(
-        'legacy_events' => array('OphLeEpatientletter'),
+        'legacy_event_types' => array('OphLeEpatientletter'),
         //'pseudonymise_patient_details' => false,
         //'ab_testing' => false,
         'auth_source' => 'LDAP',
