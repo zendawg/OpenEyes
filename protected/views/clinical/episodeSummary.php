@@ -26,7 +26,7 @@
 
 <?php
 
-function showCustomEpisode($episodeSummary) {
+function showCustomEpisode($controller, $episodeSummary) {
   $episodes = Yii::app()->params['episode_summaries'];
   $subspecialty = $episodeSummary->firm->serviceSubspecialtyAssignment->subspecialty;
   $elements = $episodes[$subspecialty->name]['layout'];
@@ -41,7 +41,7 @@ function showCustomEpisode($episodeSummary) {
       $path = $element['event_type'] . '.components.' . $class_name;
       Yii::import($path, true);
       $api = new $class_name();
-      $last_et = $api->getElementForLatestEventInEpisode($episodeSummary->patient, $episodeSummary->episode, $element['class_name']);
+      $last_et = $api->getElementForLatestEventInEpisode($episodeSummary->patient, $episodeSummary, $element['class_name']);
       $var_name = 'element';
       if ($last_et && ElementType::model()->find('class_name=:class_name', array(':class_name' => $element['class_name']))) {
         $p = array($var_name => $last_et);
@@ -62,7 +62,7 @@ function showCustomEpisode($episodeSummary) {
           $date = $last_et->last_modified_date;
         }
         echo '<h4 class="elementTypeName">' . $id . ' (' . $date . ')</h4>';
-        $episodeSummary->renderPartial($view, $p);
+        $controller->renderPartial($view, $p);
         if (isset($element['css_suffix'])) {
           echo $element['css_suffix'];
         }
@@ -70,7 +70,7 @@ function showCustomEpisode($episodeSummary) {
     } else {
       // it's a basic view:
       echo '<h4 class="elementTypeName">' . $id . '</h4>';
-      $episodeSummary->renderPartial($element['view'], array());
+      $controller->renderPartial($element['view'], array());
     }
   }
 }
@@ -84,18 +84,21 @@ $custom_episodes = isset(Yii::app()->params['episode_summaries']);
 if ($custom_episodes) {
   $subspecialty = $episode->firm->serviceSubspecialtyAssignment->subspecialty;
   try {
-    $episode_views = Yii::app()->params['episode_summaries'][$subspecialty->name]['order'];
+    if (isset(Yii::app()->params['episode_summaries'][$subspecialty->name])) {
+      $episode_views = Yii::app()->params['episode_summaries'][$subspecialty->name]['order'];
+    }
   } catch(Exception $e) {
     // config not defined, move on
   }
 }
+$x = $subspecialty->name;
 // if no user-defined config, just display the main (default) summary:
-if (!$episode_views) {
+if (!isset($episode_views)) {
   $episode_views = array('summary');
 }
 foreach ($episode_views as $ep_view) {
   if ($ep_view === 'custom') {
-    showCustomEpisode($this);
+    showCustomEpisode($this, $episode);
   }
   if ($ep_view == 'firm') {
     try {
