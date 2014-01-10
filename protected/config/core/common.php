@@ -44,6 +44,10 @@ return array(
 		'system.gii.generators.module.*',
 	),
 
+	'aliases' => array(
+		'Service' => 'application.service',
+	),
+
 	'modules' => array(
 		// Gii tool
 		'gii' => array(
@@ -167,6 +171,11 @@ return array(
 					'logFile' => 'debug.log',
 					'maxLogFiles' => 30,
 				),
+			),
+		),
+		'service' => array(
+			'class' => '\\Service\ServiceManager',
+			'internal_services' => array(
 			),
 		),
 		'session' => array(
