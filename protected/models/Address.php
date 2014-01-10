@@ -80,6 +80,7 @@ class Address extends BaseActiveRecordVersioned
 			// TODO: Make this work
 			//'parent' => array(self::BELONGS_TO, $this->parent_class, 'parent_id'),
 			'country' => array(self::BELONGS_TO, 'Country', 'country_id'),
+			'type' => array(self::BELONGS_TO, 'AddressType', 'address_type_id'),
 		);
 	}
 
