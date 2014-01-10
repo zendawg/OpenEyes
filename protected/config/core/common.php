@@ -147,6 +147,9 @@ return array(
 		'fhirMap' => array(
 			'class' => 'Service\\FhirMap',
 			'map' => array(
+				'patient' => array(
+					'pat' => 'Service\\Patient',
+				),
 				'practitioner' => array(
 					'gp' => 'Service\\Gp',
 				),
