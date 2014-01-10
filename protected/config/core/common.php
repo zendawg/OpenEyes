@@ -44,6 +44,10 @@ return array(
 		'system.gii.generators.module.*',
 	),
 
+	'aliases' => array(
+		'Service' => 'application.service',
+	),
+
 	'modules' => array(
 		// Gii tool
 		'gii' => array(
@@ -140,6 +144,11 @@ return array(
 			// use 'site/error' action to display errors
 			'errorAction' => 'site/error',
 		),
+		'fhirMap' => array(
+			'class' => 'Service\\FhirMap',
+			'map' => array(
+			),
+		),
 		'log' => array(
 			'class' => 'FlushableLogRouter',
 			'autoFlush' => 1,
@@ -168,6 +177,9 @@ return array(
 					'maxLogFiles' => 30,
 				),
 			),
+		),
+		'serviceLocator' => array(
+			'class' => '\\Service\ServiceLocator',
 		),
 		'session' => array(
 			'class' => 'CDbHttpSession',
