@@ -152,6 +152,7 @@ return array(
 				),
 				'organization' => array(
 					'cb' => 'Service\\CommissioningBody',
+					'prac' => 'Service\\Practice',
 				),
 			),
 		),
