@@ -1,0 +1,6 @@
+{
+	"title": {":subst": "title"},
+	"id": {":subst": "id"},
+	"updated": {":subst": "updated"},
+	"content": {":subst": "resource"}
+}
