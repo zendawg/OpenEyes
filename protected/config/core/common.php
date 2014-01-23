@@ -150,6 +150,9 @@ return array(
 				'practitioner' => array(
 					'gp' => 'Service\\Gp',
 				),
+				'organization' => array(
+					'cb' => 'Service\\CommissioningBody',
+				),
 			),
 		),
 		'log' => array(

@@ -1,0 +1,20 @@
+{
+	"identifier": [
+		{
+			"use": "official",
+			"label": "Organisation Code",
+			"system": {":match": "http://www.datadictionary.nhs.uk/data_dictionary/attributes/o/org/organisation_code_de.asp"},
+			"value": {":subst": "code"}
+		}
+	],
+	"name": {":subst": "name"},
+	"type": {
+		"coding": [
+			{
+				"system": "http://openeyes.org.uk/fhir/vs/org-type",
+				"code": "commissioning-body"
+			}
+		]
+	},
+	"address": [ {":subst": "address"} ]
+}
