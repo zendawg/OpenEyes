@@ -1,0 +1,9 @@
+{
+	"title": {":subst": "title"},
+	"id": {":subst": "id"},
+	"link": [
+		{"rel": "self", "href": {":subst": "self"}}
+	],
+	"updated": {":subst": "updated"},
+	"content": {":subst": "resource"}
+}
