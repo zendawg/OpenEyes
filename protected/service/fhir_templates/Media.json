@@ -1,0 +1,14 @@
+{
+  "type":  { ":subst": "type"},
+  "subject": {
+    "reference": "Media/Humphreys"
+  },
+  "height":  { ":subst": "height"},
+  "width":  { ":subst": "width"},
+  "content": {
+    "id": "a1",
+    "contentType": { ":subst": "mime_type"},
+    "data": { ":subst": "content"},
+    "title": { ":subst": "title"}
+  }
+}

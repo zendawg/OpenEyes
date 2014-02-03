@@ -162,6 +162,9 @@ return array(
 				'patient' => array(
 					'pat' => 'Service\\Patient',
 				),
+				'media' => array(
+					'med' => 'Service\\Media',
+				),
 				'practitioner' => array(
 					'gp' => 'Service\\Gp',
 				),
