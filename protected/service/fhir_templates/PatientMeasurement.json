@@ -1,0 +1,4 @@
+{
+	"patient_id":  {":subst": "patient_id"},
+	"measurement_type":  {":subst": "measurement_type"}
+}

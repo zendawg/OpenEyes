@@ -61,8 +61,16 @@ class MeasurementAPI {
 	public function addReference($patient_measurement, $reference) {
 		$measurementRef = null;
 		if ($reference instanceof Event) {
-			$measurementRef = new MeasurementReference;
-			$measurementRef->event_id = $reference->id;
+			$criteria = new CdbCriteria;
+			$criteria->condition = "event_id=:event_id and patient_measurement_id=:pmid";
+			$criteria->params = array(':event_id' => $reference->id,
+				':pmid' => $patient_measurement->id);
+			Yii::import('application.models.MeasurementReference');
+			$results = MeasurementReference::model()->find($criteria);
+			if (count($results) == 0) {
+				$measurementRef = new MeasurementReference;
+				$measurementRef->event_id = $reference->id;
+			}
 		} else if ($reference instanceof Episode) {
 			$measurementRef = new MeasurementReference;
 			$measurementRef->episode_id = $reference->id;
