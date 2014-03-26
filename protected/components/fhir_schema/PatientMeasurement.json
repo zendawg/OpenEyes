@@ -1,0 +1,4 @@
+{
+  "patient_id":{"type":"integer","plural":false},
+  "measurement_type":{"type":"integer","plural":false}
+}
