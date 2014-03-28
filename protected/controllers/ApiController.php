@@ -67,18 +67,18 @@ class ApiController extends CController
 		Yii::app()->attachEventHandler("onError", array($this, "handleError"));
 		Yii::app()->attachEventHandler("onException", array($this, "handleException"));
 
-//		header('WWW-Authenticate: Basic realm="OpenEyes"');
-//		if (!isset($_SERVER['PHP_AUTH_USER'])) {
-//			$this->sendError("Authentication required", 401, FhirValueSet::ISSUETYPE_SECURITY_LOGIN);
-//		}
-//		$identity = new UserIdentity($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
-//		if (!$identity->authenticate()) {
-//			$this->sendError("Authentication failed", 401, FhirValueSet::ISSUETYPE_SECURITY_UNKNOWN);
-//		}
-//		Yii::app()->user->login($identity);
-//		if (!Yii::app()->user->checkAccess('OprnApi')) {
-//			$this->sendError("Not authorised", 403, FhirValueSet::ISSUETYPE_SECURITY_FORBIDDEN);
-//		}
+		header('WWW-Authenticate: Basic realm="OpenEyes"');
+		if (!isset($_SERVER['PHP_AUTH_USER'])) {
+			$this->sendError("Authentication required", 401, FhirValueSet::ISSUETYPE_SECURITY_LOGIN);
+		}
+		$identity = new UserIdentity($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
+		if (!$identity->authenticate()) {
+			$this->sendError("Authentication failed", 401, FhirValueSet::ISSUETYPE_SECURITY_UNKNOWN);
+		}
+		Yii::app()->user->login($identity);
+		if (!Yii::app()->user->checkAccess('OprnApi')) {
+			$this->sendError("Not authorised", 403, FhirValueSet::ISSUETYPE_SECURITY_FORBIDDEN);
+		}
 
 		// Tags, aka HTTP categories: http://hl7.org/implement/standards/fhir/http.html#tags
 		$tags = CategoryHeader::load();
