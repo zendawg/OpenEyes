@@ -3,10 +3,6 @@
 		"type":"integer",
 		"plural":false
 	},
-	"patient_measurement_id":{
-		"type":"integer",
-		"plural":false
-	},
 	"file_reference":{
 		"type":"string",
 		"plural":false

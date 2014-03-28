@@ -18,26 +18,57 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 class MeasurementAPI {
+	
+	/**
+	 * Add a new patient measurement to an existing measurement, if and only if
+	 * the patient measurement is not already set. The appropriate measurement
+	 * type is set against the patient measurement (based on the measurement
+	 * class name).
+	 * 
+	 * @param class_name $measurement an instance of a measurement that
+	 * 'is a' patient measurement.
+	 * 
+	 * @return boolean true if a patient measurement was successfully added;
+	 * false otherwise.
+	 */
+	public function addPatientMeasurement($measurement) {
+		if ($measurement->patient_measurement_id) {
+			return false;
+		}
+		$pm = new PatientMeasurement;
+		$pm->patient_id = $measurement->patient_id;
+		$pm->measurement_type_id = MeasurementType::model()->find("class_name=:class_name", array(":class_name" => get_class($measurement)))->id;
+		if ($pm->save()) {
+			$measurement->patient_measurement_id = $pm->id;
+			return true;
+		}	
+	}
 
 	/**
-	 * Adds a new measurement of the specified type. The type is constructed
-	 * and returned, and linked to the specifed patient and measurement type.
+	 * Constructs and returns a new measurement of the specified type. The new
+	 * model is linked to the specifed patient and measurement type. A
+	 * patient measurement is also created and associated with the newly
+	 * constructed measurement.
 	 * 
 	 * @param Patient $patient the non-null patient to add the measurement for.
 	 * 
 	 * @param MeasurementType $measurement_type the non-null type of measurement.
 	 * 
-	 * @return Object if the specified type exists and a new isntance could be
+	 * @return Object if the specified type exists and a new instance could be
 	 * created and saved, that measurement type will be returned; else null
 	 * is returned. On success, the new measurement is bound to the specified
 	 * patient.
 	 */
-	public function addMeasurement($patient, $measurement_type) {
-		$measurement = new $measurement_type->class_name;
-		// TODO check inherits from base class
-		$measurement->measurement_type_id = $measurement_type->id;
-		$measurement->patient_id = $patient->id;
-		$measurement->save();
+	public function getNewMeasurement($patient, $measurement_type) {
+		$measurement = null;
+		$pm = new PatientMeasurement($patient->id, $measurement_type->class_name);
+		$pm->patient_id = $patient->id;
+		$pm->measurement_type_id = $measurement_type->id;
+		if ($pm->save()) {
+			$measurement = new $measurement_type->class_name;
+			$measurement->patient_id = $patient->id;
+			$measurement->patient_measurement_id = $pm->id;
+		}
 		return $measurement;
 	}
 
